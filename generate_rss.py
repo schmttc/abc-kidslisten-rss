@@ -3,6 +3,9 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
+import re
+import json
+
 
 # Step 1: Fetch the main page
 main_url = "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
@@ -24,34 +27,48 @@ if latest_episode_url:
 else:
     print("Latest Episode link not found.")
 
-#broken code
-# Step 2: Find the <a> tag containing the text "Latest Episode"
-#latest_episode_tag = soup.find('a', string=lambda text: text and "Latest Episode" in text)
-#if not latest_episode_tag:
-#    raise ValueError("Could not find the 'Latest Episode' link on the page.")
-
-# Step 3: Extract the href and build the full URL
-#episode_relative_url = latest_episode_tag.get('href')
-#episode_url = urljoin(main_url, episode_relative_url)
-#print(f"Latest episode URL: {episode_url}")
-
-
 # Step 4: Fetch the episode page
 episode_response = requests.get(episode_url)
 episode_soup = BeautifulSoup(episode_response.content, 'html.parser')
 
 # Step 5: Find the audio/aac URL
-audio_tag = episode_soup.find('audio')
+#audio_tag = episode_soup.find('audio')
+#audio_url = None
+#if audio_tag:
+#    source_tag = audio_tag.find('source', {'type': 'audio/aac'})
+#    if source_tag:
+#        audio_url = source_tag.get('src')
+#
+#if not audio_url:
+#    raise ValueError("Could not find the audio/aac URL on the episode page.")
+#
+#print(f"Audio URL: {audio_url}")
+
+
+# Step 5: Find the audio/aac URL from embedded JSON
 audio_url = None
-if audio_tag:
-    source_tag = audio_tag.find('source', {'type': 'audio/aac'})
-    if source_tag:
-        audio_url = source_tag.get('src')
+script_tags = episode_soup.find_all('script')
+
+for script in script_tags:
+    if script.string and 'renditions' in script.string:
+        # Try to extract JSON from the script content
+        match = re.search(r'"renditions"\s*:\s*(\[[^\]]+\])', script.string)
+        if match:
+            try:
+                renditions_json = json.loads(match.group(1))
+                for rendition in renditions_json:
+                    if rendition.get("MIMEType") == "audio/aac":
+                        audio_url = rendition.get("url")
+                        break
+            except json.JSONDecodeError:
+                continue
 
 if not audio_url:
-    raise ValueError("Could not find the audio/aac URL on the episode page.")
+    raise ValueError("Could not find the audio/aac URL in the embedded JSON.")
 
 print(f"Audio URL: {audio_url}")
+
+
 
 # Step 6: Extract metadata
 title_tag = episode_soup.find('meta', property='og:title')
