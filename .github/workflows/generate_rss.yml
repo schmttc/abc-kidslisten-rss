@@ -32,3 +32,13 @@ jobs:
         with:
           name: yoto_feed
           path: yoto_feed.xml
+
+      - name: Commit RSS feed to repo
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add yoto_feed.xml
+          git commit -m "Update RSS feed"
+          git push
+
+
