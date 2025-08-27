@@ -1,0 +1,30 @@
+name: Generate Yoto RSS Feed
+
+on:
+  workflow_dispatch:  # Allows manual triggering from GitHub UI
+  schedule:
+    - cron: '0 8 * * *'  # Optional: runs daily at 8 AM UTC
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run RSS generation script
+        run: python generate_rss.py
+      - name: Upload RSS file
+        uses: actions/upload-artifact@v3
+        with:
+          name: yoto_feed
+          path: yoto_feed.xml
