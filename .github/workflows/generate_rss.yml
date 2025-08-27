@@ -4,7 +4,7 @@ on:
   workflow_dispatch:  # Allows manual triggering from any branch
   push:
     branches:
-      - test           # Optional: runs on push to 'test' branch
+      - multigrab2           # Optional: runs on push to 'test' branch
   schedule:
     - cron: '0 8 * * *'  # Optional: runs daily at 8 AM UTC
 
