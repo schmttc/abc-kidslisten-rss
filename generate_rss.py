@@ -1,20 +1,24 @@
 import requests
 from bs4 import BeautifulSoup
 
-# Step 1: Fetch the main Bedtime Stories page
+# URL of the ABC Kids Listen Bedtime Stories page
 main_url = "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
+
+# Fetch the page content
 response = requests.get(main_url)
 soup = BeautifulSoup(response.content, 'html.parser')
 
-# Step 2: Search for the button element that precedes the "Latest Episode" text
+# Find all <a> tags and look for one that contains the text "Latest Episode"
 latest_episode_url = None
-for button in soup.find_all('a'):
-    if button.find_next(string="Latest Episode"):
-        latest_episode_url = button.get('href')
-        print("Found URL:", latest_episode_url)
+for a_tag in soup.find_all('a', href=True):
+    if 'Latest Episode' in a_tag.get_text(strip=True):
+        latest_episode_url = a_tag['href']
         break
 
-# If no URL was found, print a message
-if not latest_episode_url:
-    print("Could not find the latest episode URL.")
+# Print the full episode URL for debugging
+if latest_episode_url:
+    full_url = requests.compat.urljoin(main_url, latest_episode_url)
+    print("Latest Episode URL:", full_url)
+else:
+    print("Latest Episode link not found.")
 
