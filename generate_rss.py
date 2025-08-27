@@ -9,15 +9,32 @@ main_url = "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
 response = requests.get(main_url)
 soup = BeautifulSoup(response.content, 'html.parser')
 
+# Previously working code
+# Find all <a> tags and look for one that contains the text "Latest Episode"
+latest_episode_url = None
+for a_tag in soup.find_all('a', href=True):
+    if 'Latest Episode' in a_tag.get_text(strip=True):
+        latest_episode_url = a_tag['href']
+        break
+
+# Print the full episode URL for debugging
+if latest_episode_url:
+    episode_url = requests.compat.urljoin(main_url, latest_episode_url)
+    print("Latest Episode URL:", episode_url)
+else:
+    print("Latest Episode link not found.")
+
+#broken code
 # Step 2: Find the <a> tag containing the text "Latest Episode"
-latest_episode_tag = soup.find('a', string=lambda text: text and "Latest Episode" in text)
-if not latest_episode_tag:
-    raise ValueError("Could not find the 'Latest Episode' link on the page.")
+#latest_episode_tag = soup.find('a', string=lambda text: text and "Latest Episode" in text)
+#if not latest_episode_tag:
+#    raise ValueError("Could not find the 'Latest Episode' link on the page.")
 
 # Step 3: Extract the href and build the full URL
-episode_relative_url = latest_episode_tag.get('href')
-episode_url = urljoin(main_url, episode_relative_url)
-print(f"Latest episode URL: {episode_url}")
+#episode_relative_url = latest_episode_tag.get('href')
+#episode_url = urljoin(main_url, episode_relative_url)
+#print(f"Latest episode URL: {episode_url}")
+
 
 # Step 4: Fetch the episode page
 episode_response = requests.get(episode_url)
