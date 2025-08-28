@@ -94,7 +94,7 @@ pub_date = datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')
 
 # Step 8: Write to XML file
 #tree = ET.ElementTree(rss)
-#tree.write("yoto_feed.xml", encoding="utf-8", xml_declaration=True)
+#tree.write("abc-kidslisten-bedtimestories.rss", encoding="utf-8", xml_declaration=True)
 
 
 #----
@@ -110,7 +110,7 @@ channel.set('xmlns:atom', 'http://www.w3.org/2005/Atom')
 # Add atom:link for feed self-reference
 SubElement(channel, 'atom:link', {
     'rel': 'self',
-    'href': 'https://example.com/yoto_feed.xml',  # Replace with your actual feed URL
+    'href': 'https://example.com/abc-kidslisten-bedtimestories.rss',  # Replace with your actual feed URL
     'type': 'application/rss+xml'
 })
 
@@ -134,8 +134,8 @@ SubElement(item, 'enclosure', {
 })
 
 # Write to file with no whitespace before XML declaration
-ElementTree(rss).write('yoto_feed.xml', encoding='utf-8', xml_declaration=True)
+ElementTree(rss).write('abc-kidslisten-bedtimestories.rss', encoding='utf-8', xml_declaration=True)
 #---
 
-print("RSS feed saved to yoto_feed.xml")
+print("RSS feed saved to abc-kidslisten-bedtimestories.rss")
 
