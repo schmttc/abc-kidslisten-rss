@@ -17,7 +17,7 @@ for div in soup.find_all("div", class_="CardLayout_content__zgsBr"):
     if a_tag:
         full_url = urljoin(main_url, a_tag["href"])
         episode_links.append(full_url)
-    if len(episode_links) >= 5:
+    if len(episode_links) >= 1:         # change for number of episodes to grab
         break
 
 print("Found episode links:", episode_links)
@@ -75,7 +75,7 @@ channel = SubElement(rss, "channel")
 
 SubElement(channel, "atom:link", {
     "rel": "self",
-    "href": "https://example.com/yoto_feed.xml",  # Replace with your actual feed URL
+    "href": "https://example.com/abc-kidslisten-bedtimestories.rss",  # Replace with your actual feed URL
     "type": "application/rss+xml"
 })
 
@@ -98,6 +98,6 @@ for ep in episodes:
         "length": "0"
     })
 
-ElementTree(rss).write("yoto_feed.xml", encoding="UTF-8", xml_declaration=True)
+ElementTree(rss).write("abc-kidslisten-bedtimestories.rss", encoding="UTF-8", xml_declaration=True)
 
-print("✅ RSS feed with last 5 episodes saved to yoto_feed.xml")
+print("✅ RSS feed with last 5 episodes saved to abc-kidslisten-bedtimestories.rss")
