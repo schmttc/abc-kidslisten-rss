@@ -1,8 +1,8 @@
 name: Generate Yoto RSS Feed
 
 on:
-  #workflow_dispatch:  # Allows manual triggering from any branch
-  #push:
+  workflow_dispatch:  # Allows manual triggering from any branch
+  push:
   #  branches:
   #    - test           # Runs on push to 'test' branch
   schedule:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          ref: test  # or the desired branch
+#          ref: test  # or the desired branch
 
       - name: Set up Python
         uses: actions/setup-python@v4
