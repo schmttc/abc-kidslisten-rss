@@ -47,7 +47,7 @@ for episode_url in episode_links:
     description = description_tag['content'] if description_tag else "Bedtime story from ABC Kids Listen"
 
     # Extract publish date from meta tag
-    pub_date_tag = episode_soup.find('meta', attrs={'name': 'LastModifiedDate'})
+    pub_date_tag = episode_soup.find('meta', attrs={'name': 'datePublished'})
     if pub_date_tag and pub_date_tag.get('content'):
         try:
             pub_date_obj = datetime.strptime(pub_date_tag['content'], '%Y-%m-%dT%H:%M:%S%z')
