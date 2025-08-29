@@ -1,17 +1,15 @@
 name: Generate Yoto RSS Feed
 
 on:
-  workflow_dispatch:  # Allows manual triggering from any branch
+  workflow_dispatch:  # Allows manual triggering
   push:
-    branches:
-      - multigrab2           # Optional: runs on push to 'test' branch
   schedule:
-    - cron: '0 8 * * *'  # Optional: runs daily at 8 AM UTC
+    - cron: '7 8,9,10 * * *'  # Run when episodes drop: 7.07pm AEST, AEDT, and a backup 1 hour later (only works for default branch)
+                         # https://upptime.js.org/blog/2021/01/22/github-actions-schedule-not-working/
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -39,6 +37,5 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git add abc-kidslisten-bedtimestories.rss
           git diff --cached --quiet || (git commit -m "Update RSS feed" && git push)
-
 
 
