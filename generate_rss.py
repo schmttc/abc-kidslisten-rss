@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-from datetime import datetime, timezone
+from datetime import datetime
 import xml.etree.ElementTree as ET
 import re
 import json
@@ -46,21 +46,23 @@ for episode_url in episode_links:
     title = title_tag['content'] if title_tag else "Bedtime Story"
     description = description_tag['content'] if description_tag else "Bedtime story from ABC Kids Listen"
 
-    # Extract publish date from meta tag
-    pub_date_tag = episode_soup.find('meta', attrs={'name': 'datePublished'})
-    if pub_date_tag and pub_date_tag.get('content'):
+    # Extract publish date from JSON-LD script tag
+    pub_date = None
+    for script in episode_soup.find_all('script', type='application/ld+json'):
         try:
-            pub_date_obj = datetime.strptime(pub_date_tag['content'], '%Y-%m-%dT%H:%M:%S%z')
-            pub_date = pub_date_obj.strftime('%a, %d %b %Y %H:%M:%S GMT')
-        except ValueError:
-            pub_date = datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')
-    else:
-        pub_date = datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')
+            data = json.loads(script.string)
+            if isinstance(data, dict) and 'datePublished' in data:
+                pub_date_obj = datetime.strptime(data['datePublished'], '%Y-%m-%dT%H:%M:%S%z')
+                pub_date = pub_date_obj.strftime('%a, %d %b %Y %H:%M:%S GMT')
+                break
+        except (json.JSONDecodeError, ValueError, TypeError):
+            continue
+    if not pub_date:
+        pub_date = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
 
     # Extract audio URL from embedded JSON
     audio_url = None
-    script_tags = episode_soup.find_all('script')
-    for script in script_tags:
+    for script in episode_soup.find_all('script'):
         if script.string and 'renditions' in script.string:
             match = re.search(r'"renditions"\s*:\s*(\[[^\]]+\])', script.string)
             if match:
@@ -73,7 +75,7 @@ for episode_url in episode_links:
                 except json.JSONDecodeError:
                     continue
     if not audio_url:
-        continue  # Skip if audio URL not found
+        continue
 
     # Add item to RSS feed
     item = ET.SubElement(channel, 'item')
@@ -85,7 +87,7 @@ for episode_url in episode_links:
     ET.SubElement(item, 'enclosure', {
         'url': audio_url,
         'type': 'audio/mpeg',
-        'length': '12345678'  # You can optionally fetch actual length via HEAD request
+        'length': '12345678'
     })
 
 # Step 5: Write RSS feed to file
