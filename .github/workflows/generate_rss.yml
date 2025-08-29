@@ -6,7 +6,7 @@ on:
     branches:
       - test           # Optional: runs on push to 'test' branch
   schedule:
-    - cron: '0 8 * * *'  # Optional: runs daily at 8 AM UTC
+    - cron: '8 * * * *'  # Optional: runs daily at 8 AM UTC
 
 jobs:
   build:
