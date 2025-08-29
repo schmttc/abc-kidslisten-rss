@@ -4,7 +4,8 @@ on:
   workflow_dispatch:  # Allows manual triggering
   push:
   schedule:
-    - cron: '0 * * * *'  # Runs hourly (only works for default branch)
+    - cron: '0 * * * *'  # Run hourly (only works for default branch)
+                         # https://upptime.js.org/blog/2021/01/22/github-actions-schedule-not-working/
 
 jobs:
   build:
