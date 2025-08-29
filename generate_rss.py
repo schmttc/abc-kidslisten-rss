@@ -11,7 +11,13 @@ main_url = "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
 response = requests.get(main_url)
 soup = BeautifulSoup(response.content, 'html.parser')
 
-# Step 2: Find all episode links from divs with class 'CardLayout_content__zgsBr'
+# Step 2: Extract hero image URL from the main page
+hero_image_url = None
+og_image_tag = soup.find('meta', property='og:image')
+if og_image_tag and og_image_tag.get('content'):
+    hero_image_url = og_image_tag['content']
+
+# Step 3: Find all episode links from divs with class 'CardLayout_content__zgsBr'
 episode_links = []
 for card in soup.find_all('div', class_='CardLayout_content__zgsBr'):
     a_tag = card.find('a', href=True)
@@ -19,7 +25,7 @@ for card in soup.find_all('div', class_='CardLayout_content__zgsBr'):
         full_url = urljoin(main_url, a_tag['href'])
         episode_links.append(full_url)
 
-# Step 3: Prepare RSS feed
+# Step 4: Prepare RSS feed
 rss = ET.Element('rss', version='2.0')
 channel = ET.SubElement(rss, 'channel')
 channel.set('xmlns:atom', 'http://www.w3.org/2005/Atom')
@@ -35,7 +41,14 @@ ET.SubElement(channel, 'link').text = main_url
 ET.SubElement(channel, 'description').text = 'Latest bedtime stories from ABC Kids Listen'
 ET.SubElement(channel, 'language').text = 'en-us'
 
-# Step 4: Loop through each episode and extract metadata
+# Add podcast image if available
+if hero_image_url:
+    image = ET.SubElement(channel, 'image')
+    ET.SubElement(image, 'url').text = hero_image_url
+    ET.SubElement(image, 'title').text = 'ABC Kids Listen - Bedtime Stories'
+    ET.SubElement(image, 'link').text = main_url
+
+# Step 5: Loop through each episode and extract metadata
 for episode_url in episode_links:
     episode_response = requests.get(episode_url)
     episode_soup = BeautifulSoup(episode_response.content, 'html.parser')
@@ -87,10 +100,10 @@ for episode_url in episode_links:
     ET.SubElement(item, 'enclosure', {
         'url': audio_url,
         'type': 'audio/mpeg',
-        'length': '12345678'
+        'length': '12345678'  # Optional: use HEAD request to get actual size
     })
 
-# Step 5: Write RSS feed to file
+# Step 6: Write RSS feed to file
 tree = ET.ElementTree(rss)
 tree.write('abc-kidslisten-bedtimestories.rss', encoding='utf-8', xml_declaration=True)
 
