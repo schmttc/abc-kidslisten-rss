@@ -35,9 +35,15 @@ for card in soup.find_all('div', class_='CardLayout_content__zgsBr'):
         episode_links.append(full_url)
 
 # Step 4: Prepare RSS feed
-rss = ET.Element('rss', version='2.0')
-channel = ET.SubElement(rss, 'channel')
-channel.set('xmlns:atom', 'http://www.w3.org/2005/Atom')
+#rss = ET.Element('rss', version='2.0')
+#channel = ET.SubElement(rss, 'channel')
+#channel.set('xmlns:atom', 'http://www.w3.org/2005/Atom')
+
+rss = ET.Element('rss', version='2.0', attrib={
+    'xmlns:itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd',
+    'xmlns:atom': 'http://www.w3.org/2005/Atom'
+})
+
 
 ET.SubElement(channel, 'atom:link', {
     'rel': 'self',
@@ -49,6 +55,10 @@ ET.SubElement(channel, 'title').text = 'ABC Kids Listen - Bedtime Stories'
 ET.SubElement(channel, 'link').text = main_url
 ET.SubElement(channel, 'description').text = 'Latest bedtime stories from ABC Kids Listen'
 ET.SubElement(channel, 'language').text = 'en-us'
+ET.SubElement(channel, 'itunes:image', {
+    'href': 'https://megaphone.imgix.net/podcasts/eafbefea-648f-11ee-a501-67c7bb4c65b5/image/RBA_logo_pirate-2500.png?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress'
+})
+
 
 # Add podcast image if available
 if hero_image_url:
