@@ -11,11 +11,13 @@ main_url = "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
 response = requests.get(main_url)
 soup = BeautifulSoup(response.content, 'html.parser')
 
-# Step 2: Extract hero image URL from the main page
+# Step 2: Extract hero image URL from the AspectRatio container
 hero_image_url = None
-og_image_tag = soup.find('meta', property='og:image')
-if og_image_tag and og_image_tag.get('content'):
-    hero_image_url = og_image_tag['content']
+aspect_ratio_div = soup.find('div', class_='AspectRatio_container__FC_XH')
+if aspect_ratio_div:
+    img_tag = aspect_ratio_div.find('img')
+    if img_tag and img_tag.get('src'):
+        hero_image_url = img_tag['src']
 
 # Step 3: Find all episode links from divs with class 'CardLayout_content__zgsBr'
 episode_links = []
