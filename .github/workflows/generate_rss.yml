@@ -2,9 +2,9 @@ name: Generate Yoto RSS Feed
 
 on:
   #workflow_dispatch:  # Allows manual triggering from any branch
-  push:
-    branches:
-      - test           # Runs on push to 'test' branch
+  #push:
+  #  branches:
+  #    - test           # Runs on push to 'test' branch
   schedule:
     - cron: '0 * * * *'  # Runs daily at 8 AM UTC (only works for default branch)
 
