@@ -116,19 +116,19 @@ SubElement(channel, 'atom:link', {
 
 # Add channel metadata
 SubElement(channel, 'title').text = 'ABC Kids Listen - Bedtime Stories'
-SubElement(channel, 'link').text = 'https://www.abc.net.au/kidslisten/programs/bedtime-stories'
+SubElement(channel, 'link').text = main_url
 SubElement(channel, 'description').text = 'Latest bedtime stories from ABC Kids Listen'
 SubElement(channel, 'language').text = 'en-us'
 
 # Add an item
 item = SubElement(channel, 'item')
-SubElement(item, 'title').text = "Bedtime Stories: featuring 'The Billabong Bush Dance' and more - ABC Kids listen"
-SubElement(item, 'description').text = 'Soothing stories from your favourites, including Alison Lester, Kids listen Bookshelf, Play School'
-SubElement(item, 'pubDate').text = 'Wed, 27 Aug 2025 06:47:34 GMT'
-SubElement(item, 'link').text = 'https://www.abc.net.au/kidslisten/programs/bedtime-stories/bedtime-stories:-featuring-the-billabong-bush-dance-and-more/105648210'
-SubElement(item, 'guid').text = 'https://www.abc.net.au/kidslisten/programs/bedtime-stories/bedtime-stories:-featuring-the-billabong-bush-dance-and-more/105648210'
+SubElement(item, 'title').text = title
+SubElement(item, 'description').text = description
+SubElement(item, 'pubDate').text = pub_date
+SubElement(item, 'link').text = episode_url
+SubElement(item, 'guid').text = episode_url
 SubElement(item, 'enclosure', {
-    'url': 'https://mediacore-live-production.akamaized.net/audio/02/ck/Z/ml.aac',
+    'url': audio_url,
     'type': 'audio/mpeg',
     'length': '12345678'
 })
