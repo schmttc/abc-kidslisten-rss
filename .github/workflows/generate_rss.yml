@@ -4,9 +4,9 @@ on:
   workflow_dispatch:  # Allows manual triggering from any branch
   push:
     branches:
-      - test           # Optional: runs on push to 'test' branch
+      - test           # Runs on push to 'test' branch
   schedule:
-    - cron: '8 * * * *'  # Optional: runs daily at 8 AM UTC
+    - cron: '20 * * * *'  # Runs daily at 8 AM UTC (only works for default branch)
 
 jobs:
   build:
