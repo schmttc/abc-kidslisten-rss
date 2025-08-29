@@ -35,15 +35,14 @@ for card in soup.find_all('div', class_='CardLayout_content__zgsBr'):
         episode_links.append(full_url)
 
 # Step 4: Prepare RSS feed
-#rss = ET.Element('rss', version='2.0')
-#channel = ET.SubElement(rss, 'channel')
-#channel.set('xmlns:atom', 'http://www.w3.org/2005/Atom')
+rss = ET.Element('rss', version='2.0')
+channel = ET.SubElement(rss, 'channel')
+channel.set('xmlns:atom', 'http://www.w3.org/2005/Atom','xmlns:itunes','http://www.itunes.com/dtds/podcast-1.0.dtd')
 
-rss = ET.Element('rss', version='2.0', attrib={
-    'xmlns:itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd',
-    'xmlns:atom': 'http://www.w3.org/2005/Atom'
-})
-
+#rss = ET.Element('rss', version='2.0', attrib={
+#    'xmlns:itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd',
+#    'xmlns:atom': 'http://www.w3.org/2005/Atom'
+#})
 
 ET.SubElement(channel, 'atom:link', {
     'rel': 'self',
