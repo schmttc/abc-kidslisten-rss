@@ -45,7 +45,17 @@ for episode_url in episode_links:
     description_tag = episode_soup.find('meta', property='og:description')
     title = title_tag['content'] if title_tag else "Bedtime Story"
     description = description_tag['content'] if description_tag else "Bedtime story from ABC Kids Listen"
-    pub_date = datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')
+
+    # Extract publish date from meta tag
+    pub_date_tag = episode_soup.find('meta', attrs={'name': 'LastModifiedDate'})
+    if pub_date_tag and pub_date_tag.get('content'):
+        try:
+            pub_date_obj = datetime.strptime(pub_date_tag['content'], '%Y-%m-%dT%H:%M:%S%z')
+            pub_date = pub_date_obj.strftime('%a, %d %b %Y %H:%M:%S GMT')
+        except ValueError:
+            pub_date = datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')
+    else:
+        pub_date = datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')
 
     # Extract audio URL from embedded JSON
     audio_url = None
