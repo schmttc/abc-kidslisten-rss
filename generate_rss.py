@@ -181,12 +181,12 @@ for episode_url in episode_links:
                 duration = json.loads(script.string)
                 # walk down to the nested 'document' object
                 if "document" in duration and "mediaDuration" in duration["document"]:
-                    media_duration = duration["document"]["mediaDuration"]
+                    media_duration = str(duration["document"]["mediaDuration"])
                     break
             except json.JSONDecodeError:
                 continue
     if not media_duration:
-        media_duration = 1800
+        media_duration = "1800"
 
     # Keywords. Use JSON-LD, as if blank there is no meta name="keywords"
     keywords = None
