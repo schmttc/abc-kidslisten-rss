@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import xml.etree.ElementTree as ET
 import re
 import json
