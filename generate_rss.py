@@ -37,6 +37,8 @@ if aspect_ratio_div:
             f"&width=1400&height=1400"
         )
 
+program_image = hero_image_url # reconsile these two later
+
 # Step 3: Collect episode links
 episode_links = []
 for card in soup.find_all('div', class_='CardLayout_content__zgsBr'):
