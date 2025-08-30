@@ -1,10 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-from datetime import datetime
+from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
 import re
 import json
+import html
+
 
 # --- Config ---
 main_url = "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
