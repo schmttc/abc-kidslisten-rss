@@ -165,6 +165,7 @@ for episode_url in episode_links:
                     for rendition in renditions_json:
                         if rendition.get("MIMEType") in ["audio/aac", "audio/mpeg"]:
                             audio_url = rendition.get("url")
+                            audio_type = rendition.get("MIMEType")
                             break
                 except json.JSONDecodeError:
                     continue
@@ -204,7 +205,7 @@ for episode_url in episode_links:
     ET.SubElement(item, 'description').text = description
     ET.SubElement(item, 'enclosure', {
         'url': audio_url,
-        'type': 'audio/mpeg',
+        'type': audio_type or 'audio/mpeg',
         'length': '12345678'
     })
     ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = episode_url
