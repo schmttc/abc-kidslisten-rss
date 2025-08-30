@@ -197,7 +197,7 @@ for episode_url in episode_links:
             # The path to duration may vary slightly depending on the page structure
             media_duration = data["props"]["pageProps"]["data"]["document"]["mediaDuration"]
         except (KeyError, TypeError):
-            media_duration = None
+            media_duration = 0
     else:
         media_duration = 0
 
