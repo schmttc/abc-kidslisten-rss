@@ -144,9 +144,13 @@ for ep_url in episodes:
         ET.SubElement(item, "itunes:keywords").text = keywords
 
 # --- Step 5: Output XML ---
-xml_str = ET.tostring(rss, encoding="utf-8", xml_declaration=True).decode("utf-8")
+#xml_str = ET.tostring(rss, encoding="utf-8", xml_declaration=True).decode("utf-8")
 #print(xml_str)
-xml_str.write('abc-kidslisten-bedtimestories.rss', encoding='utf-8', xml_declaration=True)
+#xml_str.write('abc-kidslisten-bedtimestories.rss', encoding='utf-8', xml_declaration=True)
+
+# Step 6: Write RSS feed to file
+tree = ET.ElementTree(rss)
+tree.write('abc-kidslisten-bedtimestories.rss', encoding='utf-8', xml_declaration=True)
 
 print("RSS feed saved to abc-kidslisten-bedtimestories.rss")
 
