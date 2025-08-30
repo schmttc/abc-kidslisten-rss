@@ -172,23 +172,32 @@ for episode_url in episode_links:
         continue
 
     # Duration
+    #media_duration = None
+    #for script in episode_soup.find_all('script'):
+    #    if script.string and "mediaDuration" in script.string:
+    #        try:
+    #            duration = json.loads(script.string)
+    #            # walk down to the nested 'document' object
+    #            if "document" in duration and "mediaDuration" in duration["document"]:
+    #                media_duration = str(duration["document"]["mediaDuration"])
+    #                break
+    #        except json.JSONDecodeError:
+    #            continue
+    #if not media_duration:
+    #    media_duration = 60
+
+    # Duration
+    script_tag = soup.find("script", id="__NEXT_DATA__", type="application/json")
     media_duration = None
-    for script in episode_soup.find_all('script'):
-        if script.string and "mediaDuration" in script.string:
-            try:
-                duration = json.loads(script.string)
-                # walk down to the nested 'document' object
-                if "document" in duration and "mediaDuration" in duration["document"]:
-                    media_duration = str(duration["document"]["mediaDuration"])
-                    break
-            except json.JSONDecodeError:
-                continue
-    if not media_duration:
-        media_duration = 60
+    if script_tag and script_tag.string:
+        data = json.loads(script_tag.string)
+        try:
+            media_duration = data["props"]["pageProps"]["analytics"]["document"]["duration"]
+        except (KeyError, TypeError):
+            media_duration = None
 
 
-
-    # Keywords. Use JSON-LD, as if blank there is no meta name="keywords"
+    # Keywords
     keywords = None
     json_ld_tag = soup.find("script", type="application/ld+json")
     if json_ld_tag and json_ld_tag.string:
