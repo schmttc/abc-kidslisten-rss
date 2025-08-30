@@ -173,7 +173,7 @@ for episode_url in episode_links:
         continue
 
     # Duration (find not working)
-    script_tag = soup.find("script", id="__NEXT_DATA__", type="application/json")
+    script_tag = soup.find("script") #, id="__NEXT_DATA__", type="application/json"
 
     if script_tag and script_tag.string:
         data = json.loads(script_tag.string)
