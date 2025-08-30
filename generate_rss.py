@@ -174,13 +174,14 @@ for episode_url in episode_links:
         continue
 
     # Duration
+    media_duration = None
     for script in episode_soup.find_all('script'):
         if script.string and "mediaDuration" in script.string:
             try:
-                data = json.loads(script.string)
+                duration = json.loads(script.string)
                 # walk down to the nested 'document' object
-                if "document" in data and "mediaDuration" in data["document"]:
-                    media_duration = data["document"]["mediaDuration"]
+                if "document" in duration and "mediaDuration" in duration["document"]:
+                    media_duration = duration["document"]["mediaDuration"]
                     break
             except json.JSONDecodeError:
                 continue
