@@ -1,134 +1,148 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
-from datetime import datetime
+from datetime import datetime, timezone
 import xml.etree.ElementTree as ET
-import re
-import json
+import html
 
-# Step 1: Fetch the main page
+# --- Config ---
 main_url = "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
+feed_link = "https://example.com/abc-kidslisten-bedtimestories.rss"  # your final RSS URL
+now_rfc2822 = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S %z")
+
+# --- Step 1: Fetch main program page ---
 response = requests.get(main_url)
-soup = BeautifulSoup(response.content, 'html.parser')
+soup = BeautifulSoup(response.content, "html.parser")
 
+# Program metadata (fallbacks if not found)
+program_title = "ABC Kids Listen Bedtime Stories"
+program_description = "Bedtime stories from ABC Kids Listen."
+program_image = "https://www.abc.net.au/cm/rimage/12084658-1x1-large.jpg?v=2"
+program_link = main_url
 
-# Step 2: Extract hero image URL from the AspectRatio container
-hero_image_url = None
-aspect_ratio_div = soup.find('div', class_='AspectRatio_container__FC_XH')
-if aspect_ratio_div:
-    img_tag = aspect_ratio_div.find('img')
-    if img_tag and img_tag.get('src'):
-        base_url = img_tag['src'].split('?')[0]
-        # Construct podcast-compatible image URL with 1400x1400 dimensions
-        hero_image_url = (
-            f"{base_url}?impolicy=wcms_crop_resize"
-            f"&cropH=700&cropW=700&xPos=0&yPos=0"
-            f"&width=1400&height=1400"
-        )
+# Hero image (if present)
+hero_img = soup.find("img")
+if hero_img and hero_img.get("src"):
+    program_image = urljoin(main_url, hero_img["src"])
 
-# Step 3: Find all episode links from divs with class 'CardLayout_content__zgsBr'
-episode_links = []
-for card in soup.find_all('div', class_='CardLayout_content__zgsBr'):
-    a_tag = card.find('a', href=True)
-    if a_tag:
-        full_url = urljoin(main_url, a_tag['href'])
-        episode_links.append(full_url)
+# --- Step 2: Collect episode links ---
+episodes = []
+for a in soup.find_all("a", href=True):
+    href = a["href"]
+    if "/kidslisten/programs/bedtime-stories/" in href and href.count("/") > 5:
+        full_url = urljoin(main_url, href)
+        if full_url not in episodes:
+            episodes.append(full_url)
 
-# Step 4: Prepare RSS feed
-#rss = ET.Element('rss', version='2.0')
-#channel = ET.SubElement(rss, 'channel')
-#channel.set('xmlns:atom', 'http://www.w3.org/2005/Atom','xmlns:itunes','http://www.itunes.com/dtds/podcast-1.0.dtd')
+episodes = episodes[:5]  # last 5 episodes
 
-#rss = ET.Element('rss', version='2.0', attrib={
-#    'xmlns:itunes': 'http://www.itunes.com/dtds/podcast-1.0.dtd',
-#    'xmlns:atom': 'http://www.w3.org/2005/Atom'
-#})
+# --- Step 3: Build XML ---
+ET.register_namespace('', "http://www.itunes.com/dtds/podcast-1.0.dtd")
+ET.register_namespace('itunes', "http://www.itunes.com/dtds/podcast-1.0.dtd")
+ET.register_namespace('atom', "http://www.w3.org/2005/Atom")
 
-rss = ET.Element('rss', version='2.0')
-rss.attrib['xmlns:itunes'] = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
-rss.attrib['xmlns:atom'] = 'http://www.w3.org/2005/Atom'
-channel = ET.SubElement(rss, 'channel')
-
-
-ET.SubElement(channel, 'atom:link', {
-    'rel': 'self',
-    'href': 'https://example.com/abc-kidslisten-bedtimestories.rss',  # Replace with actual feed URL
-    'type': 'application/rss+xml'
+rss = ET.Element("rss", {
+    "version": "2.0",
+    "xmlns:itunes": "http://www.itunes.com/dtds/podcast-1.0.dtd",
+    "xmlns:atom": "http://www.w3.org/2005/Atom"
 })
 
-ET.SubElement(channel, 'title').text = 'ABC Kids Listen - Bedtime Stories'
-ET.SubElement(channel, 'link').text = main_url
-ET.SubElement(channel, 'description').text = 'Latest bedtime stories from ABC Kids Listen'
-ET.SubElement(channel, 'language').text = 'en-us'
-ET.SubElement(channel, 'itunes:image', {
-    'href': 'https://megaphone.imgix.net/podcasts/eafbefea-648f-11ee-a501-67c7bb4c65b5/image/RBA_logo_pirate-2500.png?ixlib=rails-4.3.1&max-w=3000&max-h=3000&fit=crop&auto=format,compress'
+channel = ET.SubElement(rss, "channel")
+
+# --- Channel Metadata ---
+ET.SubElement(channel, "itunes:category", text="Kids & Family")
+ET.SubElement(channel, "itunes:image", href=program_image)
+itunes_owner = ET.SubElement(channel, "itunes:owner")
+ET.SubElement(itunes_owner, "itunes:name").text = "Australian Broadcasting Corporation"
+ET.SubElement(itunes_owner, "itunes:email").text = "abcpodcasts@abc.net.au"
+
+ET.SubElement(channel, "itunes:author").text = "ABC Kids listen"
+ET.SubElement(channel, "title").text = program_title
+ET.SubElement(channel, "link").text = program_link
+ET.SubElement(channel, "description").text = program_description
+ET.SubElement(channel, "language").text = "en"
+ET.SubElement(channel, "copyright").text = "Copyright 2025, Australian Broadcasting Corporation. All rights reserved."
+ET.SubElement(channel, "pubDate").text = now_rfc2822
+ET.SubElement(channel, "lastBuildDate").text = now_rfc2822
+
+image = ET.SubElement(channel, "image")
+ET.SubElement(image, "title").text = program_title
+ET.SubElement(image, "url").text = program_image
+ET.SubElement(image, "link").text = program_link
+ET.SubElement(image, "description").text = program_description
+
+ET.SubElement(channel, "ttl").text = "30"
+ET.SubElement(channel, "atom:link", {
+    "href": feed_link,
+    "rel": "self",
+    "type": "application/rss+xml"
 })
+ET.SubElement(channel, "itunes:explicit").text = "no"
+ET.SubElement(channel, "itunes:summary").text = program_description
+ET.SubElement(channel, "itunes:subtitle").text = program_description
 
+# Add channel-level keywords (static)
+ET.SubElement(channel, "itunes:keywords").text = "kids, stories, bedtime, abc, podcast, children, audio, tales"
 
-# Add podcast image if available
-if hero_image_url:
-    image = ET.SubElement(channel, 'image')
-    ET.SubElement(image, 'url').text = hero_image_url
-    ET.SubElement(image, 'title').text = 'ABC Kids Listen - Bedtime Stories'
-    ET.SubElement(image, 'link').text = main_url
+# --- Step 4: Scrape each episode ---
+for ep_url in episodes:
+    ep_res = requests.get(ep_url)
+    ep_soup = BeautifulSoup(ep_res.content, "html.parser")
 
-# Step 5: Loop through each episode and extract metadata
-for episode_url in episode_links:
-    episode_response = requests.get(episode_url)
-    episode_soup = BeautifulSoup(episode_response.content, 'html.parser')
+    # Title
+    title_tag = ep_soup.find("title")
+    ep_title = title_tag.text.strip() if title_tag else "Untitled Episode"
 
-    # Extract title and description
-    title_tag = episode_soup.find('meta', property='og:title')
-    description_tag = episode_soup.find('meta', property='og:description')
-    title = title_tag['content'] if title_tag else "Bedtime Story"
-    description = description_tag['content'] if description_tag else "Bedtime story from ABC Kids Listen"
+    # Description
+    desc_tag = ep_soup.find("meta", {"name": "description"})
+    ep_desc = desc_tag["content"].strip() if desc_tag else ep_title
 
-    # Extract publish date from JSON-LD script tag
-    pub_date = None
-    for script in episode_soup.find_all('script', type='application/ld+json'):
+    # JSON-LD audio extraction
+    ep_audio = None
+    ep_duration = None
+    keywords = None
+    for script in ep_soup.find_all("script", type="application/ld+json"):
         try:
-            data = json.loads(script.string)
-            if isinstance(data, dict) and 'datePublished' in data:
-                pub_date_obj = datetime.strptime(data['datePublished'], '%Y-%m-%dT%H:%M:%S%z')
-                pub_date = pub_date_obj.strftime('%a, %d %b %Y %H:%M:%S GMT')
+            data = script.string.strip()
+            if '"@type": "AudioObject"' in data:
+                import json
+                j = json.loads(data)
+                ep_audio = j.get("contentUrl")
+                ep_duration = j.get("duration")
+                keywords = j.get("keywords")
                 break
-        except (json.JSONDecodeError, ValueError, TypeError):
-            continue
-    if not pub_date:
-        pub_date = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
+        except Exception:
+            pass
 
-    # Extract audio URL from embedded JSON
-    audio_url = None
-    for script in episode_soup.find_all('script'):
-        if script.string and 'renditions' in script.string:
-            match = re.search(r'"renditions"\s*:\s*(\[[^\]]+\])', script.string)
-            if match:
-                try:
-                    renditions_json = json.loads(match.group(1))
-                    for rendition in renditions_json:
-                        if rendition.get("MIMEType") in ["audio/aac", "audio/mpeg"]:
-                            audio_url = rendition.get("url")
-                            break
-                except json.JSONDecodeError:
-                    continue
-    if not audio_url:
-        continue
+    if not ep_audio:
+        continue  # skip if no audio
 
-    # Add item to RSS feed
-    item = ET.SubElement(channel, 'item')
-    ET.SubElement(item, 'title').text = title
-    ET.SubElement(item, 'description').text = description
-    ET.SubElement(item, 'pubDate').text = pub_date
-    ET.SubElement(item, 'link').text = episode_url
-    ET.SubElement(item, 'guid').text = episode_url
-    ET.SubElement(item, 'enclosure', {
-        'url': audio_url,
-        'type': 'audio/mpeg',
-        'length': '12345678'  # Optional: use HEAD request to get actual size
+    item = ET.SubElement(channel, "item")
+    ET.SubElement(item, "title").text = ep_title
+    ET.SubElement(item, "link").text = ep_url
+
+    desc_elem = ET.SubElement(item, "description")
+    desc_elem.text = f"<![CDATA[{ep_desc}]]>"
+
+    ET.SubElement(item, "enclosure", {
+        "url": ep_audio,
+        "length": "0",  # ABC doesn’t expose reliably, leave 0
+        "type": "audio/mpeg"
     })
+    ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = ep_url
+    ET.SubElement(item, "pubDate").text = now_rfc2822
 
-# Step 6: Write RSS feed to file
-tree = ET.ElementTree(rss)
-tree.write('abc-kidslisten-bedtimestories.rss', encoding='utf-8', xml_declaration=True)
+    ET.SubElement(item, "itunes:author").text = "Australian Broadcasting Corporation"
+    ET.SubElement(item, "itunes:summary").text = ep_desc
+    ET.SubElement(item, "itunes:subtitle").text = ep_desc
+    ET.SubElement(item, "itunes:image", href=program_image)
 
-print("RSS feed saved to abc-kidslisten-bedtimestories.rss")
+    if ep_duration:
+        ET.SubElement(item, "itunes:duration").text = ep_duration
+
+    if keywords:
+        ET.SubElement(item, "itunes:keywords").text = keywords
+
+# --- Step 5: Output XML ---
+xml_str = ET.tostring(rss, encoding="utf-8", xml_declaration=True).decode("utf-8")
+print(xml_str)
