@@ -120,8 +120,8 @@ ET.SubElement(channel, "itunes:author").text = "ABC KIDS listen"    #duplicate, 
 ET.SubElement(channel, "itunes:summary").text = program_description
 ET.SubElement(channel, "itunes:subtitle").text = program_description
 meta_site_name = soup.find("meta", property="og:site_name")
-if tag and tag.get("content"):
-    site_name = tag["content"]
+if meta_site_name and meta_site_name.get("content"):
+    site_name = meta_site_name["content"]
 else:
     site_name = itunes_owner
 ET.SubElement(itunes_owner, "itunes:name").text = site_name
