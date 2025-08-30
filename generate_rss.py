@@ -171,27 +171,11 @@ for episode_url in episode_links:
     if not audio_url:
         continue
 
-    # Duration
-    #media_duration = None
-    #for script in episode_soup.find_all('script'):
-    #    if script.string and "mediaDuration" in script.string:
-    #        try:
-    #            duration = json.loads(script.string)
-    #            # walk down to the nested 'document' object
-    #            if "document" in duration and "mediaDuration" in duration["document"]:
-    #                media_duration = str(duration["document"]["mediaDuration"])
-    #                break
-    #        except json.JSONDecodeError:
-    #            continue
-    #if not media_duration:
-    #    media_duration = 60
-
-    # Duration
+    # Duration (find not working)
     script_tag = soup.find("script", id="__NEXT_DATA__", type="application/json")
 
     if script_tag and script_tag.string:
         data = json.loads(script_tag.string)
-        
         # navigate to the duration
         try:
             # The path to duration may vary slightly depending on the page structure
@@ -200,7 +184,6 @@ for episode_url in episode_links:
             media_duration = 0
     else:
         media_duration = 0
-
 
     # Keywords
     keywords = None
