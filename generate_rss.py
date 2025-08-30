@@ -175,15 +175,15 @@ for episode_url in episode_links:
 
     # Duration
     for script in episode_soup.find_all('script'):
-    if script.string and "mediaDuration" in script.string:
-        try:
-            data = json.loads(script.string)
-            # walk down to the nested 'document' object
-            if "document" in data and "mediaDuration" in data["document"]:
-                media_duration = data["document"]["mediaDuration"]
-                break
-        except json.JSONDecodeError:
-            continue
+        if script.string and "mediaDuration" in script.string:
+            try:
+                data = json.loads(script.string)
+                # walk down to the nested 'document' object
+                if "document" in data and "mediaDuration" in data["document"]:
+                    media_duration = data["document"]["mediaDuration"]
+                    break
+            except json.JSONDecodeError:
+                continue
     if not media_duration:
         media_duration = 1800
 
