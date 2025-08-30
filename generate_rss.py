@@ -188,13 +188,18 @@ for episode_url in episode_links:
 
     # Duration
     script_tag = soup.find("script", id="__NEXT_DATA__", type="application/json")
-    media_duration = None
+
     if script_tag and script_tag.string:
         data = json.loads(script_tag.string)
+        
+        # navigate to the duration
         try:
-            media_duration = data["props"]["pageProps"]["analytics"]["document"]["duration"]
+            # The path to duration may vary slightly depending on the page structure
+            media_duration = data["props"]["pageProps"]["data"]["document"]["mediaDuration"]
         except (KeyError, TypeError):
             media_duration = None
+    else:
+        media_duration = 0
 
 
     # Keywords
