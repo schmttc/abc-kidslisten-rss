@@ -164,7 +164,7 @@ for episode_url in episode_links:
     # RSS <item>
     item = ET.SubElement(channel, 'item')
     ET.SubElement(item, 'title').text = title
-#        desc_elem.text = f"<![CDATA[{ep_desc}]]>" for reference
+#        desc_elem.text = f"<![CDATA[{description}]]>" for reference
     ET.SubElement(item, 'description').text = description
     ET.SubElement(item, 'pubDate').text = pub_date
     ET.SubElement(item, 'link').text = episode_url
@@ -175,8 +175,8 @@ for episode_url in episode_links:
         'length': '12345678'
     })
     ET.SubElement(item, "itunes:author").text = "Australian Broadcasting Corporation"
-    ET.SubElement(item, "itunes:summary").text = ep_desc
-    ET.SubElement(item, "itunes:subtitle").text = ep_desc
+    ET.SubElement(item, "itunes:summary").text = description
+    ET.SubElement(item, "itunes:subtitle").text = description
     ET.SubElement(item, "itunes:image", href=program_image)
 
 
