@@ -180,7 +180,7 @@ for episode_url in episode_links:
         # navigate to the duration
         try:
             # The path to duration may vary slightly depending on the page structure
-            media_duration = data["props"]["pageProps"]["data"]["document"]["mediaDuration"]
+            media_duration = data["props"]["pageProps"]["data"]["documentProps"]["analytics"]["document"]["mediaDuration"]
         except (KeyError, TypeError):
             media_duration = 0
     else:
