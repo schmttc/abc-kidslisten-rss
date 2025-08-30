@@ -119,17 +119,15 @@ ET.SubElement(channel, "itunes:explicit").text = "no"
 ET.SubElement(channel, "itunes:author").text = "ABC KIDS listen"    #duplicate, same as Dino Dome
 ET.SubElement(channel, "itunes:summary").text = program_description
 ET.SubElement(channel, "itunes:subtitle").text = program_description
-meta_site_name = soup.find("meta", property="og:site_name")
-if meta_site_name and meta_site_name.get("content"):
-    site_name = meta_site_name["content"]
-else:
-    site_name = itunes_owner
-ET.SubElement(itunes_owner, "itunes:name").text = site_name
-ET.SubElement(itunes_owner, "itunes:email").text = "website@triplej.abc.net.au"
+# this gets placed at the top, not as a second list further down like Dino Dome
+#meta_site_name = soup.find("meta", property="og:site_name")
+#if meta_site_name and meta_site_name.get("content"):
+#    site_name = meta_site_name["content"]
+#else:
+#    site_name = itunes_owner
+#ET.SubElement(itunes_owner, "itunes:name").text = site_name
+#ET.SubElement(itunes_owner, "itunes:email").text = "website@triplej.abc.net.au"
 ET.SubElement(channel, "itunes:image", href=program_image)
-
-# Add channel-level keywords (static)
-#ET.SubElement(channel, "itunes:keywords").text = "kids, stories, bedtime, abc, podcast, children, audio, tales"
 
 # Step 5: Loop through episodes
 for episode_url in episode_links:
@@ -186,7 +184,9 @@ for episode_url in episode_links:
             except json.JSONDecodeError:
                 continue
     if not media_duration:
-        media_duration = "1800"
+        media_duration = 60
+
+
 
     # Keywords. Use JSON-LD, as if blank there is no meta name="keywords"
     keywords = None
@@ -216,7 +216,7 @@ for episode_url in episode_links:
     ET.SubElement(item, "itunes:summary").text = description
     ET.SubElement(item, "itunes:subtitle").text = description
     ET.SubElement(item, "itunes:image", href=program_image)
-    ET.SubElement(item, "itunes:duration").text = media_duration
+    ET.SubElement(item, "itunes:duration").text = str(datetime.timedelta(media_duration=media_duration))
     ET.SubElement(item, "itunes:keywords").text = keywords
 
 
