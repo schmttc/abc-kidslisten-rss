@@ -145,4 +145,8 @@ for ep_url in episodes:
 
 # --- Step 5: Output XML ---
 xml_str = ET.tostring(rss, encoding="utf-8", xml_declaration=True).decode("utf-8")
-print(xml_str)
+#print(xml_str)
+xml_str.write('abc-kidslisten-bedtimestories.rss', encoding='utf-8', xml_declaration=True)
+
+print("RSS feed saved to abc-kidslisten-bedtimestories.rss")
+
