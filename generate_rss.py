@@ -216,7 +216,7 @@ for episode_url in episode_links:
     ET.SubElement(item, "itunes:summary").text = description
     ET.SubElement(item, "itunes:subtitle").text = description
     ET.SubElement(item, "itunes:image", href=program_image)
-    ET.SubElement(item, "itunes:duration").text = str(timedelta(media_duration=media_duration))
+    ET.SubElement(item, "itunes:duration").text = str(timedelta(seconds=media_duration))
     ET.SubElement(item, "itunes:keywords").text = keywords
 
 
