@@ -24,18 +24,23 @@ program_description = "Bedtime stories from ABC Kids Listen."
 #program_image = "https://www.abc.net.au/cm/rimage/12084658-1x1-large.jpg?v=2"
 program_link = main_url
 
+meta_description = soup.find('meta', attrs={'name': 'description'})
+program_description = get('content')
+
+
 # Step 2: Extract hero image URL
 hero_image_url = None
 aspect_ratio_div = soup.find('div', class_='AspectRatio_container__FC_XH')
 if aspect_ratio_div:
     img_tag = aspect_ratio_div.find('img')
     if img_tag and img_tag.get('src'):
-        base_url = img_tag['src'].split('?')[0]
-        hero_image_url = (
-            f"{base_url}?impolicy=wcms_crop_resize"
-            f"&cropH=700&cropW=700&xPos=0&yPos=0"
-            f"&width=1400&height=1400"
-        )
+        #base_url = img_tag['src'].split('?')[0]
+        hero_image_url = img_tag['src'].split('?')[0]
+        #hero_image_url = (
+        #    f"{base_url}?impolicy=wcms_crop_resize"
+        #    f"&cropH=700&cropW=700&xPos=0&yPos=0"
+        #    f"&width=1400&height=1400"
+        #)
 
 program_image = hero_image_url # reconsile these two later
 
@@ -98,8 +103,8 @@ ET.SubElement(channel, "lastBuildDate").text = now_rfc2822
     # Standard <image> tag
 if hero_image_url:
     image = ET.SubElement(channel, 'image')
-    ET.SubElement(image, 'url').text = hero_image_url
     ET.SubElement(image, 'title').text = program_title
+    ET.SubElement(image, 'url').text = hero_image_url
     ET.SubElement(image, 'link').text = main_url
     ET.SubElement(image, "description").text = program_description
 
@@ -111,13 +116,20 @@ ET.SubElement(channel, "atom:link", {
     "type": "application/rss+xml"
 })
 ET.SubElement(channel, "itunes:explicit").text = "no"
+ET.SubElement(channel, "itunes:author").text = "ABC KIDS listen"    #duplicate, same as Dino Dome
 ET.SubElement(channel, "itunes:summary").text = program_description
 ET.SubElement(channel, "itunes:subtitle").text = program_description
+meta_site_name = soup.find("meta", property="og:site_name")
+if tag and tag.get("content"):
+    site_name = tag["content"]
+else:
+    site_name = itunes_owner
+ET.SubElement(itunes_owner, "itunes:name").text = site_name
+ET.SubElement(itunes_owner, "itunes:email").text = "website@triplej.abc.net.au"
+ET.SubElement(channel, "itunes:image", href=program_image)
 
 # Add channel-level keywords (static)
-ET.SubElement(channel, "itunes:keywords").text = "kids, stories, bedtime, abc, podcast, children, audio, tales"
-
-
+#ET.SubElement(channel, "itunes:keywords").text = "kids, stories, bedtime, abc, podcast, children, audio, tales"
 
 # Step 5: Loop through episodes
 for episode_url in episode_links:
@@ -161,24 +173,50 @@ for episode_url in episode_links:
     if not audio_url:
         continue
 
+    # Duration
+    for script in episode_soup.find_all('script'):
+    if script.string and "mediaDuration" in script.string:
+        try:
+            data = json.loads(script.string)
+            # walk down to the nested 'document' object
+            if "document" in data and "mediaDuration" in data["document"]:
+                media_duration = data["document"]["mediaDuration"]
+                break
+        except json.JSONDecodeError:
+            continue
+    if not media_duration:
+        media_duration = 1800
+
+    # Keywords. Use JSON-LD, as if blank there is no meta name="keywords"
+    keywords = None
+    json_ld_tag = soup.find("script", type="application/ld+json")
+    if json_ld_tag and json_ld_tag.string:
+        try:
+            data = json.loads(json_ld_tag.string)
+            if "keywords" in data:
+                keywords = data["keywords"]
+        except json.JSONDecodeError:
+            pass
+
     # RSS <item>
     item = ET.SubElement(channel, 'item')
     ET.SubElement(item, 'title').text = title
+    ET.SubElement(item, 'link').text = episode_url
 #        desc_elem.text = f"<![CDATA[{description}]]>" for reference
     ET.SubElement(item, 'description').text = description
-    ET.SubElement(item, 'pubDate').text = pub_date
-    ET.SubElement(item, 'link').text = episode_url
-    ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = episode_url
     ET.SubElement(item, 'enclosure', {
         'url': audio_url,
         'type': 'audio/mpeg',
         'length': '12345678'
     })
-    ET.SubElement(item, "itunes:author").text = "Australian Broadcasting Corporation"
+    ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = episode_url
+    ET.SubElement(item, 'pubDate').text = pub_date
+    ET.SubElement(item, "itunes:author").text = "Australian Broadcasting Corporation" 
     ET.SubElement(item, "itunes:summary").text = description
     ET.SubElement(item, "itunes:subtitle").text = description
     ET.SubElement(item, "itunes:image", href=program_image)
-
+    ET.SubElement(item, "itunes:duration").text = media_duration
+    ET.SubElement(item, "itunes:keywords").text = keywords
 
 
 # Step 6: Save feed
