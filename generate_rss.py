@@ -6,10 +6,21 @@ import xml.etree.ElementTree as ET
 import re
 import json
 
-# Step 1: Fetch the main page
+# --- Config ---
 main_url = "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
+feed_link = "https://example.com/abc-kidslisten-bedtimestories.rss"  # your final RSS URL
+now_rfc2822 = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S %z")
+
+
+# Step 1: Fetch the main page
 response = requests.get(main_url)
 soup = BeautifulSoup(response.content, 'html.parser')
+
+# Program metadata (fallbacks if not found)
+program_title = "ABC Kids Listen Bedtime Stories"
+program_description = "Bedtime stories from ABC Kids Listen."
+#program_image = "https://www.abc.net.au/cm/rimage/12084658-1x1-large.jpg?v=2"
+program_link = main_url
 
 # Step 2: Extract hero image URL
 hero_image_url = None
@@ -32,6 +43,15 @@ for card in soup.find_all('div', class_='CardLayout_content__zgsBr'):
         full_url = urljoin(main_url, a_tag['href'])
         episode_links.append(full_url)
 
+#episode_links = episode_links[:5]  # last 5 episodes
+
+#not sure if this section is required?
+# --- Step 3: Build XML ---
+#ET.register_namespace('', "http://www.itunes.com/dtds/podcast-1.0.dtd")
+#ET.register_namespace('itunes', "http://www.itunes.com/dtds/podcast-1.0.dtd")
+#ET.register_namespace('atom', "http://www.w3.org/2005/Atom")
+
+
 # Step 4: Build RSS feed root
 rss = ET.Element('rss', version='2.0')
 rss.attrib['xmlns:itunes'] = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
@@ -39,27 +59,61 @@ rss.attrib['xmlns:atom'] = 'http://www.w3.org/2005/Atom'
 channel = ET.SubElement(rss, 'channel')
 
 # Feed-level metadata
-ET.SubElement(channel, 'atom:link', {
-    'rel': 'self',
-    'href': 'https://example.com/abc-kidslisten-bedtimestories.rss',  # Replace with actual feed URL
-    'type': 'application/rss+xml'
-})
-ET.SubElement(channel, 'title').text = 'ABC Kids Listen - Bedtime Stories'
-ET.SubElement(channel, 'link').text = main_url
-ET.SubElement(channel, 'description').text = 'Latest bedtime stories from ABC Kids Listen'
-ET.SubElement(channel, 'language').text = 'en-us'
-ET.SubElement(channel, 'itunes:author').text = 'ABC Kids Listen'
-ET.SubElement(channel, 'itunes:keywords').text = "kids, stories, bedtime, abc, podcast, children, audio, tales"
-ET.SubElement(channel, 'itunes:image', {
-    'href': hero_image_url or "https://megaphone.imgix.net/podcasts/eafbefea-648f-11ee-a501-67c7bb4c65b5/image/RBA_logo_pirate-2500.png" #fix this
-})
+#ET.SubElement(channel, 'atom:link', {
+#    'rel': 'self',
+#    'href': 'https://example.com/abc-kidslisten-bedtimestories.rss',  # Replace with actual feed URL
+#    'type': 'application/rss+xml'
+#})
+#ET.SubElement(channel, 'title').text = 'ABC Kids Listen - Bedtime Stories'
+#ET.SubElement(channel, 'link').text = main_url
+#ET.SubElement(channel, 'description').text = 'Latest bedtime stories from ABC Kids Listen'
+#ET.SubElement(channel, 'language').text = 'en-us'
+#ET.SubElement(channel, 'itunes:author').text = 'ABC Kids Listen'
+#ET.SubElement(channel, 'itunes:keywords').text = "kids, stories, bedtime, abc, podcast, children, audio, tales"
+#ET.SubElement(channel, 'itunes:image', {
+#    'href': hero_image_url or "https://megaphone.imgix.net/podcasts/eafbefea-648f-11ee-a501-67c7bb4c65b5/image/RBA_logo_pirate-2500.png" #fix this
+#})
 
-# Standard <image> tag
+# --- Channel Metadata ---
+ET.SubElement(channel, "itunes:category", text="Kids & Family")
+ET.SubElement(channel, "itunes:image", href=program_image)
+itunes_owner = ET.SubElement(channel, "itunes:owner")
+ET.SubElement(itunes_owner, "itunes:name").text = "Australian Broadcasting Corporation"
+ET.SubElement(itunes_owner, "itunes:email").text = "abcpodcasts@abc.net.au"
+
+ET.SubElement(channel, "itunes:author").text = "ABC Kids listen"
+ET.SubElement(channel, "title").text = program_title
+ET.SubElement(channel, "link").text = program_link
+ET.SubElement(channel, "description").text = program_description
+ET.SubElement(channel, "language").text = "en"
+ET.SubElement(channel, "copyright").text = "Copyright 2025, Australian Broadcasting Corporation. All rights reserved."
+ET.SubElement(channel, "pubDate").text = now_rfc2822
+ET.SubElement(channel, "lastBuildDate").text = now_rfc2822
+
+
+    # Standard <image> tag
 if hero_image_url:
     image = ET.SubElement(channel, 'image')
     ET.SubElement(image, 'url').text = hero_image_url
-    ET.SubElement(image, 'title').text = 'ABC Kids Listen - Bedtime Stories'
+    ET.SubElement(image, 'title').text = program_title
     ET.SubElement(image, 'link').text = main_url
+    ET.SubElement(image, "description").text = program_description
+
+#continue channel metadata
+ET.SubElement(channel, "ttl").text = "30"
+ET.SubElement(channel, "atom:link", {
+    "href": feed_link,
+    "rel": "self",
+    "type": "application/rss+xml"
+})
+ET.SubElement(channel, "itunes:explicit").text = "no"
+ET.SubElement(channel, "itunes:summary").text = program_description
+ET.SubElement(channel, "itunes:subtitle").text = program_description
+
+# Add channel-level keywords (static)
+ET.SubElement(channel, "itunes:keywords").text = "kids, stories, bedtime, abc, podcast, children, audio, tales"
+
+
 
 # Step 5: Loop through episodes
 for episode_url in episode_links:
@@ -106,15 +160,22 @@ for episode_url in episode_links:
     # RSS <item>
     item = ET.SubElement(channel, 'item')
     ET.SubElement(item, 'title').text = title
+#        desc_elem.text = f"<![CDATA[{ep_desc}]]>" for reference
     ET.SubElement(item, 'description').text = description
     ET.SubElement(item, 'pubDate').text = pub_date
     ET.SubElement(item, 'link').text = episode_url
-    ET.SubElement(item, 'guid').text = episode_url
+    ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = episode_url
     ET.SubElement(item, 'enclosure', {
         'url': audio_url,
         'type': 'audio/mpeg',
         'length': '12345678'
     })
+    ET.SubElement(item, "itunes:author").text = "Australian Broadcasting Corporation"
+    ET.SubElement(item, "itunes:summary").text = ep_desc
+    ET.SubElement(item, "itunes:subtitle").text = ep_desc
+    ET.SubElement(item, "itunes:image", href=program_image)
+
+
 
 # Step 6: Save feed
 tree = ET.ElementTree(rss)
