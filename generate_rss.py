@@ -25,7 +25,7 @@ program_description = "Bedtime stories from ABC Kids Listen."
 program_link = main_url
 
 meta_description = soup.find('meta', attrs={'name': 'description'})
-program_description = get('content')
+program_description = meta_description.get('content')
 
 
 # Step 2: Extract hero image URL
