@@ -163,7 +163,7 @@ for episode_url in episode_links:
                 try:
                     renditions_json = json.loads(match.group(1))
                     for rendition in renditions_json:
-                        if rendition.get("MIMEType") in ["audio/mpeg"]:  #audio/aac doens't play on yoto v3 ["audio/aac", ]
+                        if rendition.get("MIMEType") == "audio/mpeg":  #audio/aac doens't play on yoto v3 ["audio/aac", ]
                             audio_url = rendition.get("url")
                             audio_type = rendition.get("MIMEType")
                             break
