@@ -9,8 +9,6 @@ import html
 import os
 
 # --- Config ---
-#main_url = "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
-#feed_link = "https://example.com/abc-kidslisten-bedtimestories.rss"  # your final RSS URL
 main_url = os.getenv("main_url")
 feed_link = os.getenv("feed_link")
 now_rfc2822 = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S %z")
@@ -19,15 +17,12 @@ now_rfc2822 = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S %z")
 response = requests.get(main_url)
 soup = BeautifulSoup(response.content, 'html.parser')
 
-# Program metadata (fallbacks if not found)
+# Program metadata (Need to add scrape for fixed items)
 program_title = "ABC Kids Listen Bedtime Stories"
 program_description = "Bedtime stories from ABC Kids Listen."
-#program_image = "https://www.abc.net.au/cm/rimage/12084658-1x1-large.jpg?v=2"
 program_link = main_url
-
 meta_description = soup.find('meta', attrs={'name': 'description'})
 program_description = meta_description.get('content')
-
 
 # Step 2: Extract hero image URL
 hero_image_url = None
@@ -35,15 +30,7 @@ aspect_ratio_div = soup.find('div', class_='AspectRatio_container__FC_XH')
 if aspect_ratio_div:
     img_tag = aspect_ratio_div.find('img')
     if img_tag and img_tag.get('src'):
-        #base_url = img_tag['src'].split('?')[0]
         hero_image_url = img_tag['src'].split('?')[0]
-        #hero_image_url = (
-        #    f"{base_url}?impolicy=wcms_crop_resize"
-        #    f"&cropH=700&cropW=700&xPos=0&yPos=0"
-        #    f"&width=1400&height=1400"
-        #)
-
-program_image = hero_image_url # reconsile these two later
 
 # Step 3: Collect episode links
 episode_links = []
@@ -61,10 +48,9 @@ rss.attrib['xmlns:itunes'] = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
 rss.attrib['xmlns:atom'] = 'http://www.w3.org/2005/Atom'
 channel = ET.SubElement(rss, 'channel')
 
-
 # --- Channel Metadata ---
 ET.SubElement(channel, "itunes:category", text="Kids & Family")
-ET.SubElement(channel, "itunes:image", href=program_image)
+ET.SubElement(channel, "itunes:image", href=hero_image_url)
 itunes_owner = ET.SubElement(channel, "itunes:owner")
 ET.SubElement(itunes_owner, "itunes:name").text = "Australian Broadcasting Corporation"
 ET.SubElement(itunes_owner, "itunes:email").text = "abcpodcasts@abc.net.au"
@@ -97,7 +83,7 @@ ET.SubElement(channel, "itunes:explicit").text = "no"
 ET.SubElement(channel, "itunes:author").text = "ABC KIDS listen"    #duplicate, same as Dino Dome example
 ET.SubElement(channel, "itunes:summary").text = program_description
 ET.SubElement(channel, "itunes:subtitle").text = program_description
-ET.SubElement(channel, "itunes:image", href=program_image)
+ET.SubElement(channel, "itunes:image", href=hero_image_url)
 
 # Step 5: Loop through episodes
 for episode_url in episode_links:
@@ -182,7 +168,7 @@ for episode_url in episode_links:
     ET.SubElement(item, "itunes:author").text = "Australian Broadcasting Corporation" 
     ET.SubElement(item, "itunes:summary").text = description
     ET.SubElement(item, "itunes:subtitle").text = description
-    ET.SubElement(item, "itunes:image", href=program_image)
+    ET.SubElement(item, "itunes:image", href=hero_image_url)    # Need to add a search for the episode image
     ET.SubElement(item, "itunes:duration").text = str(timedelta(seconds=media_duration))
     ET.SubElement(item, "itunes:keywords").text = keywords
 
