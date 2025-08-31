@@ -7,12 +7,12 @@ import re
 import json
 import html
 
-
 # --- Config ---
-main_url = "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
-feed_link = "https://example.com/abc-kidslisten-bedtimestories.rss"  # your final RSS URL
+#main_url = "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
+#feed_link = "https://example.com/abc-kidslisten-bedtimestories.rss"  # your final RSS URL
+main_url = os.getenv("main_url")
+feed_link = os.getenv("feed_link")
 now_rfc2822 = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S %z")
-
 
 # Step 1: Fetch the main page
 response = requests.get(main_url)
@@ -93,17 +93,9 @@ ET.SubElement(channel, "atom:link", {
     "type": "application/rss+xml"
 })
 ET.SubElement(channel, "itunes:explicit").text = "no"
-ET.SubElement(channel, "itunes:author").text = "ABC KIDS listen"    #duplicate, same as Dino Dome
+ET.SubElement(channel, "itunes:author").text = "ABC KIDS listen"    #duplicate, same as Dino Dome example
 ET.SubElement(channel, "itunes:summary").text = program_description
 ET.SubElement(channel, "itunes:subtitle").text = program_description
-# this gets placed at the top, not as a second list further down like Dino Dome, skip
-#meta_site_name = soup.find("meta", property="og:site_name")
-#if meta_site_name and meta_site_name.get("content"):
-#    site_name = meta_site_name["content"]
-#else:
-#    site_name = itunes_owner
-#ET.SubElement(itunes_owner, "itunes:name").text = site_name
-#ET.SubElement(itunes_owner, "itunes:email").text = "website@triplej.abc.net.au"
 ET.SubElement(channel, "itunes:image", href=program_image)
 
 # Step 5: Loop through episodes
@@ -178,7 +170,6 @@ for episode_url in episode_links:
     item = ET.SubElement(channel, 'item')
     ET.SubElement(item, 'title').text = title
     ET.SubElement(item, 'link').text = episode_url
-#        desc_elem.text = f"<![CDATA[{description}]]>" for reference
     ET.SubElement(item, 'description').text = description
     ET.SubElement(item, 'enclosure', {
         'url': audio_url,

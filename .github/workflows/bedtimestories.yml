@@ -10,6 +10,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      main_url: "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
+      feed_link: "https://raw.githubusercontent.com/schmttc/abc-kidslisten-rss/refs/heads/fixxml/abc-kidslisten-bedtimestories.rss"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
