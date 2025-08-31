@@ -1,0 +1,44 @@
+name: Generate RSS Feed for ABC Bedtime Stories
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+  push:
+  schedule:
+    - cron: '7 8,9,10 * * *'  # Run when episodes drop: 7.07pm AEST, AEDT, and a backup 1 hour later (only works for default branch)
+                         # https://upptime.js.org/blog/2021/01/22/github-actions-schedule-not-working/
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      main_url: "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
+      feed_link: "https://raw.githubusercontent.com/schmttc/abc-kidslisten-rss/refs/heads/fixxml/abc-kidslisten-bedtimestories.rss"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run RSS generation script
+        run: python ./scripts/generate_rss.py
+
+      - name: Upload RSS file
+        uses: actions/upload-artifact@v4
+        with:
+          name: abc-kidslisten-bedtimestories
+          path: abc-kidslisten-bedtimestories.rss
+
+      - name: Commit RSS feed to repo
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add abc-kidslisten-bedtimestories.rss
+          git diff --cached --quiet || (git commit -m "Update RSS feed" && git push)
+
+
