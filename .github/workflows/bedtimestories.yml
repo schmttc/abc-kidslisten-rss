@@ -1,4 +1,4 @@
-name: Generate Yoto RSS Feed
+name: Generate RSS Feed for ABC Bedtime Stories
 
 on:
   workflow_dispatch:  # Allows manual triggering
@@ -26,7 +26,7 @@ jobs:
         run: pip install requests beautifulsoup4
 
       - name: Run RSS generation script
-        run: python generate_rss.py
+        run: python ./scripts/generate_rss.py
 
       - name: Upload RSS file
         uses: actions/upload-artifact@v4
