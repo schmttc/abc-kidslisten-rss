@@ -54,34 +54,12 @@ for card in soup.find_all('div', class_='CardLayout_content__zgsBr'):
 
 #episode_links = episode_links[:5]  # last 5 episodes
 
-#not sure if this section is required?
-# --- Step 3: Build XML ---
-#ET.register_namespace('', "http://www.itunes.com/dtds/podcast-1.0.dtd")
-#ET.register_namespace('itunes', "http://www.itunes.com/dtds/podcast-1.0.dtd")
-#ET.register_namespace('atom', "http://www.w3.org/2005/Atom")
-
-
 # Step 4: Build RSS feed root
 rss = ET.Element('rss', version='2.0')
 rss.attrib['xmlns:itunes'] = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
 rss.attrib['xmlns:atom'] = 'http://www.w3.org/2005/Atom'
 channel = ET.SubElement(rss, 'channel')
 
-# Feed-level metadata
-#ET.SubElement(channel, 'atom:link', {
-#    'rel': 'self',
-#    'href': 'https://example.com/abc-kidslisten-bedtimestories.rss',  # Replace with actual feed URL
-#    'type': 'application/rss+xml'
-#})
-#ET.SubElement(channel, 'title').text = 'ABC Kids Listen - Bedtime Stories'
-#ET.SubElement(channel, 'link').text = main_url
-#ET.SubElement(channel, 'description').text = 'Latest bedtime stories from ABC Kids Listen'
-#ET.SubElement(channel, 'language').text = 'en-us'
-#ET.SubElement(channel, 'itunes:author').text = 'ABC Kids Listen'
-#ET.SubElement(channel, 'itunes:keywords').text = "kids, stories, bedtime, abc, podcast, children, audio, tales"
-#ET.SubElement(channel, 'itunes:image', {
-#    'href': hero_image_url or "https://megaphone.imgix.net/podcasts/eafbefea-648f-11ee-a501-67c7bb4c65b5/image/RBA_logo_pirate-2500.png" #fix this
-#})
 
 # --- Channel Metadata ---
 ET.SubElement(channel, "itunes:category", text="Kids & Family")
@@ -99,8 +77,7 @@ ET.SubElement(channel, "copyright").text = "Copyright 2025, Australian Broadcast
 ET.SubElement(channel, "pubDate").text = now_rfc2822
 ET.SubElement(channel, "lastBuildDate").text = now_rfc2822
 
-
-    # Standard <image> tag
+# Standard <image> tag
 if hero_image_url:
     image = ET.SubElement(channel, 'image')
     ET.SubElement(image, 'title').text = program_title
@@ -119,7 +96,7 @@ ET.SubElement(channel, "itunes:explicit").text = "no"
 ET.SubElement(channel, "itunes:author").text = "ABC KIDS listen"    #duplicate, same as Dino Dome
 ET.SubElement(channel, "itunes:summary").text = program_description
 ET.SubElement(channel, "itunes:subtitle").text = program_description
-# this gets placed at the top, not as a second list further down like Dino Dome
+# this gets placed at the top, not as a second list further down like Dino Dome, skip
 #meta_site_name = soup.find("meta", property="og:site_name")
 #if meta_site_name and meta_site_name.get("content"):
 #    site_name = meta_site_name["content"]
