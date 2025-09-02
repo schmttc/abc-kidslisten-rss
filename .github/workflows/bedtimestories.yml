@@ -4,7 +4,7 @@ on:
   workflow_dispatch:  # Allows manual triggering
   push:
   schedule:
-    - cron: '7 8,9,10 * * *'  # Run when episodes drop: 7.07pm AEST, AEDT, and a backup 1 hour later (only works for default branch)
+    - cron: '7 10 * * *'  # Run when episodes drop: 8.07pm AEDT (only works for default branch)
                          # https://upptime.js.org/blog/2021/01/22/github-actions-schedule-not-working/
 
 jobs:
