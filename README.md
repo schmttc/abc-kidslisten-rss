@@ -6,4 +6,7 @@ Generally updated within a few hour of release. Copy the URL link into your podc
 | Program | URL |
 | :------ | :---------: |
 | Bedtime Stories| https://raw.githubusercontent.com/schmttc/abc-kidslisten-rss/refs/heads/main/abc-kidslisten-bedtimestories.rss |
+| Dino Dome | https://www.abc.net.au/feeds/13961702/podcast.xml |
+
+
 
