@@ -19,7 +19,7 @@ soup = BeautifulSoup(response.content, 'html.parser')
 
 # Program metadata from main_url
 meta_title = soup.find('meta', attrs={'name': 'title'})
-program_title = meta_description.get('content')
+program_title = meta_title.get('content')
 
 program_link = main_url
 
