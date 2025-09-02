@@ -2,9 +2,9 @@ name: Generate RSS Feed for ABC Kids Listen - Bedtime Stories
 
 on:
   workflow_dispatch:  # Allows manual triggering
-  push:
+  #push:
   schedule:
-    - cron: '7 10 * * *'  # Run when episodes drop: 8.07pm AEDT (only works for default branch)
+    - cron: '7 10 * * *'  # Run after episodes drop: 8.07pm AEDT (only works for default branch)
                          # https://upptime.js.org/blog/2021/01/22/github-actions-schedule-not-working/
 
 jobs:
