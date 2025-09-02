@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from datetime import datetime, timezone, timedelta
 import xml.etree.ElementTree as ET
 import re
@@ -17,10 +17,12 @@ now_rfc2822 = datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S %z")
 response = requests.get(main_url)
 soup = BeautifulSoup(response.content, 'html.parser')
 
-# Program metadata (Need to add scrape for fixed items)
-program_title = "ABC Kids Listen Bedtime Stories"
-program_description = "Bedtime stories from ABC Kids Listen."
+# Program metadata from main_url
+meta_title = soup.find('meta', attrs={'name': 'title'})
+program_title = meta_title.get('content')
+
 program_link = main_url
+
 meta_description = soup.find('meta', attrs={'name': 'description'})
 program_description = meta_description.get('content')
 
@@ -33,6 +35,7 @@ if aspect_ratio_div:
         hero_image_url = img_tag['src'].split('?')[0]
 
 # Step 3: Collect episode links
+# Currently only work for the episodes on the first page
 episode_links = []
 for card in soup.find_all('div', class_='CardLayout_content__zgsBr'):
     a_tag = card.find('a', href=True)
@@ -40,6 +43,7 @@ for card in soup.find_all('div', class_='CardLayout_content__zgsBr'):
         full_url = urljoin(main_url, a_tag['href'])
         episode_links.append(full_url)
 
+# Limit max number of episodes
 #episode_links = episode_links[:5]  # last 5 episodes
 
 # Step 4: Build RSS feed root
@@ -93,8 +97,8 @@ for episode_url in episode_links:
     # Title & description
     title_tag = episode_soup.find('meta', property='og:title')
     description_tag = episode_soup.find('meta', property='og:description')
-    title = title_tag['content'] if title_tag else "Bedtime Story"
-    description = description_tag['content'] if description_tag else "Bedtime story from ABC Kids Listen"
+    title = title_tag['content'] if title_tag else meta_title
+    description = description_tag['content'] if description_tag else program_description
 
     # Date
     pub_date = None
@@ -111,6 +115,7 @@ for episode_url in episode_links:
         pub_date = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
 
     # Audio URL
+    # As of Aug 2025, audio/aac doens't play on Yoto v3 device. MP3 is the more widely supported podcast format in general
     audio_url = None
     for script in episode_soup.find_all('script'):
         if script.string and 'renditions' in script.string:
@@ -119,7 +124,7 @@ for episode_url in episode_links:
                 try:
                     renditions_json = json.loads(match.group(1))
                     for rendition in renditions_json:
-                        if rendition.get("MIMEType") == "audio/mpeg":  #audio/aac doens't play on yoto v3 ["audio/aac", ]
+                        if rendition.get("MIMEType") == "audio/mpeg":  
                             audio_url = rendition.get("url")
                             audio_type = rendition.get("MIMEType")
                             break
@@ -175,6 +180,6 @@ for episode_url in episode_links:
 
 # Step 6: Save feed
 tree = ET.ElementTree(rss)
-tree.write('abc-kidslisten-bedtimestories.rss', encoding='utf-8', xml_declaration=True)
+tree.write(os.path.basename(urlparse(feed_link).path), encoding='utf-8', xml_declaration=True)
 
-print("✅ RSS feed saved to abc-kidslisten-bedtimestories.rss")
+print("✅ RSS feed saved to ", os.path.basename(urlparse(feed_link).path))

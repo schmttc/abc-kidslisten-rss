@@ -1,18 +1,18 @@
-name: Generate RSS Feed for ABC Kids Listen - Bedtime Stories
+name: Generate RSS Feed for ABC Kids Listen - Story Time
 
 on:
   workflow_dispatch:  # Allows manual triggering
   #push:
   schedule:
-    - cron: '7 10 * * *'  # Run after episodes drop: 8.07pm AEDT (only works for default branch)
+    - cron: '7 3 * * *'  # Run after episodes drop: 1.07pm AEDT (only works for default branch)
                          # https://upptime.js.org/blog/2021/01/22/github-actions-schedule-not-working/
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      main_url: "https://www.abc.net.au/kidslisten/programs/bedtime-stories"
-      feed_link: "https://raw.githubusercontent.com/schmttc/abc-kidslisten-rss/refs/heads/fixxml/abc-kidslisten-bedtimestories.rss"
+      main_url: "https://www.abc.net.au/kidslisten/programs/story-time"
+      feed_link: "https://raw.githubusercontent.com/schmttc/abc-kidslisten-rss/refs/heads/fixxml/abc-kidslisten-storytime.rss"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -31,14 +31,14 @@ jobs:
       - name: Upload RSS file
         uses: actions/upload-artifact@v4
         with:
-          name: abc-kidslisten-bedtimestories
-          path: abc-kidslisten-bedtimestories.rss
+          name: abc-kidslisten-storytime
+          path: abc-kidslisten-storytime.rss
 
       - name: Commit RSS feed to repo
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          git add abc-kidslisten-bedtimestories.rss
+          git add abc-kidslisten-storytime.rss
           git diff --cached --quiet || (git commit -m "Update RSS feed" && git push)
 
 
