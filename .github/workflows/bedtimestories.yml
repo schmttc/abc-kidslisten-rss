@@ -1,4 +1,4 @@
-name: Generate RSS Feed for ABC Bedtime Stories
+name: Generate RSS Feed for ABC Kids Listen - Bedtime Stories
 
 on:
   workflow_dispatch:  # Allows manual triggering
