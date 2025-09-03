@@ -1,5 +1,5 @@
 ## abc-kidslisten-rss
-Generates podcast RSS feeds from ABC Kids Listen (https://www.abc.net.au/kidslisten), originally for use with Yoto player MTO cards.
+Generates podcast RSS feeds from ABC Kids Listen (https://www.abc.net.au/kidslisten), originally for use with Yoto player MYO cards.
 
 ## Available Programs
 We try to update within a few hour of release. Copy the URL link into your podcast feed to import.
@@ -25,4 +25,5 @@ We try to update within a few hour of release. Copy the URL link into your podca
       <td align="center"><a href="https://schmttc.github.io/abc-kidslisten-rss/abc-kidslisten-storytime.rss">https://schmttc.github.io/abc-kidslisten-rss/abc-kidslisten-storytime.rss</a></td>
     </tr>
   </tbody>
+
 </table>
