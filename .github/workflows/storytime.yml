@@ -1,4 +1,4 @@
-name: Generate RSS Feed for ABC Kids Listen - Story Time
+name: Story Time
 
 on:
   workflow_dispatch:  # Allows manual triggering
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       main_url: "https://www.abc.net.au/kidslisten/programs/story-time"
-      feed_link: "https://raw.githubusercontent.com/schmttc/abc-kidslisten-rss/refs/heads/fixxml/abc-kidslisten-storytime.rss"
+      feed_link: "https://schmttc.github.io/abc-kidslisten-rss/abc-kidslisten-storytime.rss"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
