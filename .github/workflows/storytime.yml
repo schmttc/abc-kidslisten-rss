@@ -1,4 +1,4 @@
-name: Generate RSS Feed for ABC Kids Listen - Story Time
+name: Story Time
 
 on:
   workflow_dispatch:  # Allows manual triggering
