@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from datetime import datetime, timezone, timedelta
+from email.utils import format_datetime
 import xml.etree.ElementTree as ET
 import re
 import json
@@ -108,12 +109,14 @@ for episode_url in episode_links:
             data = json.loads(script.string)
             if isinstance(data, dict) and 'datePublished' in data:
                 pub_date_obj = datetime.strptime(data['datePublished'], '%Y-%m-%dT%H:%M:%S%z')
-                pub_date = pub_date_obj.strftime('%a, %d %b %Y %H:%M:%S GMT')
+                #pub_date = pub_date_obj.strftime('%a, %d %b %Y %H:%M:%S GMT')
+                pub_date = format_datetime(pub_date_obj)
                 break
         except (json.JSONDecodeError, ValueError, TypeError):
             continue
     if not pub_date:
-        pub_date = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
+        #pub_date = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
+        pub_date = format_datetime(datetime.utcnow().replace(tzinfo=timezone.utc))
 
     # Audio URL
     # As of Aug 2025, audio/aac doens't play on Yoto v3 device. MP3 is the more widely supported podcast format in general
