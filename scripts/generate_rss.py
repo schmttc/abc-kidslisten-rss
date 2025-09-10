@@ -142,7 +142,7 @@ for episode_url in episode_links:
         script_text = script.get_text()
         match = re.search(r'"duration"\s*:\s*(\d+)', script_text)
         if match:
-            media_duration = match.group(1) #int(match.group(1))
+            media_duration = str(match.group(1))
             print("Duration:", media_duration)
             break
 
