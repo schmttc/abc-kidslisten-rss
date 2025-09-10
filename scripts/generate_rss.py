@@ -128,7 +128,7 @@ for episode_url in episode_links:
                         if rendition.get("MIMEType") == "audio/mpeg":  
                             audio_url = rendition.get("url")
                             audio_type = rendition.get("MIMEType")
-                            audio_fileSize = rendition.get("fileSize")
+                            audio_fileSize = str(rendition.get("fileSize"))
                             break
                 except json.JSONDecodeError:
                     continue
@@ -143,7 +143,6 @@ for episode_url in episode_links:
         match = re.search(r'"duration"\s*:\s*(\d+)', script_text)
         if match:
             media_duration = match.group(1)
-            print("Duration:", media_duration)
             break
 
 
@@ -167,7 +166,7 @@ for episode_url in episode_links:
     ET.SubElement(item, 'enclosure', {
         'url': audio_url,
         'type': audio_type or 'audio/mpeg',
-        'length': str(audio_fileSize) if audio_fileSize else '12345678'
+        'length': audio_fileSize
     })
     ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = episode_url
     ET.SubElement(item, 'pubDate').text = pub_date
