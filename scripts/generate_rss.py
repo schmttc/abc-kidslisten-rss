@@ -50,6 +50,7 @@ for card in soup.find_all('div', class_='CardLayout_content__zgsBr'):
 rss = ET.Element('rss', version='2.0')
 rss.attrib['xmlns:itunes'] = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
 rss.attrib['xmlns:atom'] = 'http://www.w3.org/2005/Atom'
+rss.attrib['xmlns:content'] = 'http://purl.org/rss/1.0/modules/content/'
 channel = ET.SubElement(rss, 'channel')
 
 # --- Channel Metadata ---
@@ -83,11 +84,11 @@ ET.SubElement(channel, "atom:link", {
     "rel": "self",
     "type": "application/rss+xml"
 })
-ET.SubElement(channel, "itunes:explicit").text = "no"
+ET.SubElement(channel, "itunes:explicit").text = "false"
 ET.SubElement(channel, "itunes:author").text = "ABC KIDS listen"    #duplicate, same as Dino Dome example
 ET.SubElement(channel, "itunes:summary").text = program_description
 ET.SubElement(channel, "itunes:subtitle").text = program_description
-ET.SubElement(channel, "itunes:image", href=hero_image_url)
+#ET.SubElement(channel, "itunes:image", href=hero_image_url)        #duplicate, is already included above
 
 # Step 5: Loop through episodes
 for episode_url in episode_links:
@@ -175,11 +176,12 @@ for episode_url in episode_links:
     ET.SubElement(item, "itunes:subtitle").text = description
     ET.SubElement(item, "itunes:image", href=hero_image_url)    # Need to add a search for the episode image
     ET.SubElement(item, "itunes:duration").text = str(timedelta(seconds=media_duration))
+    ET.SubElement(item, "itunes:explicit").text = "false"
     ET.SubElement(item, "itunes:keywords").text = keywords
 
 
 # Step 6: Save feed
 tree = ET.ElementTree(rss)
-tree.write(os.path.basename(urlparse(feed_link).path), encoding='utf-8', xml_declaration=True)
+tree.write(os.path.basename(urlparse(feed_link).path), encoding="UTF-8", xml_declaration=True)
 
 print("✅ RSS feed saved to ", os.path.basename(urlparse(feed_link).path))
