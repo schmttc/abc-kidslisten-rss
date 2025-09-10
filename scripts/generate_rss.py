@@ -134,30 +134,6 @@ for episode_url in episode_links:
     if not audio_url:
         continue
 
-    # Duration (find not working)
-    media_duration = 0
-    for script in episode_soup.find_all('script'):
-        script_text = script.get_text()
-        if 'renditions' in script_text:
-            match = re.search(r'"renditions"\s*:\s*(\[[^\]]+\])', script_text)
-            if match:
-                try:
-                    renditions_json = json.loads(match.group(1))
-                    for rendition in renditions_json:
-                        if rendition.get("duration"):
-                            media_duration = rendition["duration"]
-                            break
-                except json.JSONDecodeError:
-                    continue
-
-    if not media_duration:
-        # Handle missing duration appropriately
-        continue  # Only valid if inside a loop
-
-    
-    print(media_duration)
-
-
     # Keywords
     keywords = None
     json_ld_tag = soup.find("script", type="application/ld+json")
