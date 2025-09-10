@@ -163,10 +163,11 @@ for episode_url in episode_links:
     ET.SubElement(item, 'title').text = title
     ET.SubElement(item, 'link').text = episode_url
     ET.SubElement(item, 'description').text = description
+    print("debug enclosure")
     ET.SubElement(item, 'enclosure', {
         'url': audio_url,
         'type': audio_type or 'audio/mpeg',
-        'length': str(audio_fileSize) or '12345678'
+        'length': str(audio_fileSize) if audio_fileSize else '12345678'
     })
     ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = episode_url
     ET.SubElement(item, 'pubDate').text = pub_date
@@ -174,6 +175,7 @@ for episode_url in episode_links:
     ET.SubElement(item, "itunes:summary").text = description
     ET.SubElement(item, "itunes:subtitle").text = description
     ET.SubElement(item, "itunes:image", href=hero_image_url)    # Need to add a search for the episode image
+    print("debug duration")
     ET.SubElement(item, "itunes:duration").text = str(media_duration) # str(timedelta(seconds=media_duration))
     ET.SubElement(item, "itunes:explicit").text = "false"
     ET.SubElement(item, "itunes:keywords").text = keywords
