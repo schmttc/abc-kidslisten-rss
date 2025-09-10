@@ -134,6 +134,9 @@ for episode_url in episode_links:
     if not audio_url:
         continue
 
+    # Duration (find not working)
+    media_duration = 0
+
     # Keywords
     keywords = None
     json_ld_tag = soup.find("script", type="application/ld+json")
