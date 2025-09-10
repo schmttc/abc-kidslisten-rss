@@ -128,7 +128,7 @@ for episode_url in episode_links:
                         if rendition.get("MIMEType") == "audio/mpeg":  
                             audio_url = rendition.get("url")
                             audio_type = rendition.get("MIMEType")
-                            audio_fileSize = str(rendition.get("fileSize"))
+                            audio_fileSize = rendition.get("fileSize")
                             break
                 except json.JSONDecodeError:
                     continue
@@ -142,7 +142,7 @@ for episode_url in episode_links:
         script_text = script.get_text()
         match = re.search(r'"duration"\s*:\s*(\d+)', script_text)
         if match:
-            media_duration = str(match.group(1))
+            media_duration = match.group(1)
             print("Duration:", media_duration)
             break
 
@@ -166,7 +166,7 @@ for episode_url in episode_links:
     ET.SubElement(item, 'enclosure', {
         'url': audio_url,
         'type': audio_type or 'audio/mpeg',
-        'length': audio_fileSize or '12345678'
+        'length': str(audio_fileSize) or '12345678'
     })
     ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = episode_url
     ET.SubElement(item, 'pubDate').text = pub_date
@@ -174,7 +174,7 @@ for episode_url in episode_links:
     ET.SubElement(item, "itunes:summary").text = description
     ET.SubElement(item, "itunes:subtitle").text = description
     ET.SubElement(item, "itunes:image", href=hero_image_url)    # Need to add a search for the episode image
-    ET.SubElement(item, "itunes:duration").text = media_duration # str(timedelta(seconds=media_duration))
+    ET.SubElement(item, "itunes:duration").text = str(media_duration) # str(timedelta(seconds=media_duration))
     ET.SubElement(item, "itunes:explicit").text = "false"
     ET.SubElement(item, "itunes:keywords").text = keywords
 
