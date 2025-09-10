@@ -140,11 +140,15 @@ for episode_url in episode_links:
     if script_tag and script_tag.string:
         data = json.loads(script_tag.string)
         # navigate to the duration
-        try:
-            # The path to duration may vary slightly depending on the page structure
-            media_duration = data["props"]["pageProps"]["data"]["documentProps"]["analytics"]["document"]["mediaDuration"]
-        except (KeyError, TypeError):
-            media_duration = 0
+        if match:
+            duration_value = int(match.group(1))
+            print(duration_value)
+            break
+    #    try:
+    #        # The path to duration may vary slightly depending on the page structure
+    #        media_duration = data["props"]["pageProps"]["data"]["documentProps"]["analytics"]["document"]["mediaDuration"]
+    #    except (KeyError, TypeError):
+    #        media_duration = 0
     else:
         media_duration = 0
 
