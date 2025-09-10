@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from datetime import datetime, timezone, timedelta
+from email.utils import format_datetime
 import xml.etree.ElementTree as ET
 import re
 import json
@@ -50,6 +51,7 @@ for card in soup.find_all('div', class_='CardLayout_content__zgsBr'):
 rss = ET.Element('rss', version='2.0')
 rss.attrib['xmlns:itunes'] = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
 rss.attrib['xmlns:atom'] = 'http://www.w3.org/2005/Atom'
+rss.attrib['xmlns:content'] = 'http://purl.org/rss/1.0/modules/content/'
 channel = ET.SubElement(rss, 'channel')
 
 # --- Channel Metadata ---
@@ -83,11 +85,11 @@ ET.SubElement(channel, "atom:link", {
     "rel": "self",
     "type": "application/rss+xml"
 })
-ET.SubElement(channel, "itunes:explicit").text = "no"
+ET.SubElement(channel, "itunes:explicit").text = "false"
 ET.SubElement(channel, "itunes:author").text = "ABC KIDS listen"    #duplicate, same as Dino Dome example
 ET.SubElement(channel, "itunes:summary").text = program_description
 ET.SubElement(channel, "itunes:subtitle").text = program_description
-ET.SubElement(channel, "itunes:image", href=hero_image_url)
+#ET.SubElement(channel, "itunes:image", href=hero_image_url)        #duplicate, is already included above
 
 # Step 5: Loop through episodes
 for episode_url in episode_links:
@@ -107,12 +109,14 @@ for episode_url in episode_links:
             data = json.loads(script.string)
             if isinstance(data, dict) and 'datePublished' in data:
                 pub_date_obj = datetime.strptime(data['datePublished'], '%Y-%m-%dT%H:%M:%S%z')
-                pub_date = pub_date_obj.strftime('%a, %d %b %Y %H:%M:%S GMT')
+                #pub_date = pub_date_obj.strftime('%a, %d %b %Y %H:%M:%S GMT')
+                pub_date = format_datetime(pub_date_obj)
                 break
         except (json.JSONDecodeError, ValueError, TypeError):
             continue
     if not pub_date:
-        pub_date = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
+        #pub_date = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
+        pub_date = format_datetime(datetime.utcnow().replace(tzinfo=timezone.utc))
 
     # Audio URL
     # As of Aug 2025, audio/aac doens't play on Yoto v3 device. MP3 is the more widely supported podcast format in general
@@ -127,6 +131,7 @@ for episode_url in episode_links:
                         if rendition.get("MIMEType") == "audio/mpeg":  
                             audio_url = rendition.get("url")
                             audio_type = rendition.get("MIMEType")
+                            audio_fileSize = str(rendition.get("fileSize"))
                             break
                 except json.JSONDecodeError:
                     continue
@@ -134,18 +139,15 @@ for episode_url in episode_links:
         continue
 
     # Duration (find not working)
-    script_tag = soup.find("script") #, id="__NEXT_DATA__", type="application/json"
+    media_duration = 0
 
-    if script_tag and script_tag.string:
-        data = json.loads(script_tag.string)
-        # navigate to the duration
-        try:
-            # The path to duration may vary slightly depending on the page structure
-            media_duration = data["props"]["pageProps"]["data"]["documentProps"]["analytics"]["document"]["mediaDuration"]
-        except (KeyError, TypeError):
-            media_duration = 0
-    else:
-        media_duration = 0
+    for script in episode_soup.find_all('script'):
+        script_text = script.get_text()
+        match = re.search(r'"duration"\s*:\s*(\d+)', script_text)
+        if match:
+            media_duration = match.group(1)
+            break
+
 
     # Keywords
     keywords = None
@@ -163,10 +165,11 @@ for episode_url in episode_links:
     ET.SubElement(item, 'title').text = title
     ET.SubElement(item, 'link').text = episode_url
     ET.SubElement(item, 'description').text = description
+    print("debug enclosure")
     ET.SubElement(item, 'enclosure', {
         'url': audio_url,
         'type': audio_type or 'audio/mpeg',
-        'length': '12345678'
+        'length': audio_fileSize
     })
     ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = episode_url
     ET.SubElement(item, 'pubDate').text = pub_date
@@ -174,12 +177,14 @@ for episode_url in episode_links:
     ET.SubElement(item, "itunes:summary").text = description
     ET.SubElement(item, "itunes:subtitle").text = description
     ET.SubElement(item, "itunes:image", href=hero_image_url)    # Need to add a search for the episode image
-    ET.SubElement(item, "itunes:duration").text = str(timedelta(seconds=media_duration))
+    print("debug duration")
+    ET.SubElement(item, "itunes:duration").text = str(media_duration) # str(timedelta(seconds=media_duration))
+    ET.SubElement(item, "itunes:explicit").text = "false"
     ET.SubElement(item, "itunes:keywords").text = keywords
 
 
 # Step 6: Save feed
 tree = ET.ElementTree(rss)
-tree.write(os.path.basename(urlparse(feed_link).path), encoding='utf-8', xml_declaration=True)
+tree.write(os.path.basename(urlparse(feed_link).path), encoding="UTF-8", xml_declaration=True)
 
 print("✅ RSS feed saved to ", os.path.basename(urlparse(feed_link).path))
