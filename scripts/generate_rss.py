@@ -129,6 +129,7 @@ for episode_url in episode_links:
                             audio_url = rendition.get("url")
                             audio_type = rendition.get("MIMEType")
                             audio_fileSize = str(rendition.get("fileSize"))
+                            print(type(audio_fileSize))
                             break
                 except json.JSONDecodeError:
                     continue
