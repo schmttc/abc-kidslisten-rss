@@ -135,22 +135,23 @@ for episode_url in episode_links:
         continue
 
     # Duration (find not working)
-    script_tag = soup.find("script") #, id="__NEXT_DATA__", type="application/json"
+    media_duration = 0
+    for script in episode_soup.find_all('script'):
+        if script.string and 'renditions' in script.string:
+            match = re.search(r'"renditions"\s*:\s*(\[[^\]]+\])', script.string)
+            if match:
+                try:
+                    renditions_json = json.loads(match.group(1))
+                    for rendition in renditions_json:
+                        if rendition.get("duration"):  
+                            media_duration = rendition.get("duration")
+                            break
+                except json.JSONDecodeError:
+                    continue
+    if not media_duration:
+        continue
+    print(media_duration)
 
-    if script_tag and script_tag.string:
-        data = json.loads(script_tag.string)
-        # navigate to the duration
-        if match:
-            duration_value = int(match.group(1))
-            print(duration_value)
-            break
-    #    try:
-    #        # The path to duration may vary slightly depending on the page structure
-    #        media_duration = data["props"]["pageProps"]["data"]["documentProps"]["analytics"]["document"]["mediaDuration"]
-    #    except (KeyError, TypeError):
-    #        media_duration = 0
-    else:
-        media_duration = 0
 
     # Keywords
     keywords = None
