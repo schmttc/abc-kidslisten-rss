@@ -31,3 +31,7 @@ Scheduled update within a few hour of release. Copy the URL link into your podca
   </tbody>
 </table>
 
+## Technical Info
+- Podcast episodes must be in MP3 format to import as a Yoto Podcast. I have not been able to get any technical requirements for podcast RSS formats from Yoto support, but this is based on my experiece with a Yoto v3, August 2025
+  - AAC formatted episodes do not show up in the app/web interface when importing the Podcast RSS
+  - If AAC formatted entries are faked as MP3 using type="audio/mpeg", they will import and display in the Yoto Podcast list, and will play on your phone, but will not play on the Yoto device, either from a  MYO card or sent from your phone
