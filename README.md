@@ -1,3 +1,11 @@
+## sillyclone
+The current format doesn't update the playlist on a yoto device.
+To rule out RSS format issues, I've cloned a podcast that does update https://feeds.buzzsprout.com/2243253.rss
+
+
+
+
+
 ## abc-kidslisten-rss
 Generates podcast RSS feeds from ABC Kids Listen (https://www.abc.net.au/kidslisten), for use with Yoto player MYO cards.
 

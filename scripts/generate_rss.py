@@ -52,44 +52,37 @@ rss = ET.Element('rss', version='2.0')
 rss.attrib['xmlns:itunes'] = 'http://www.itunes.com/dtds/podcast-1.0.dtd'
 rss.attrib['xmlns:atom'] = 'http://www.w3.org/2005/Atom'
 rss.attrib['xmlns:content'] = 'http://purl.org/rss/1.0/modules/content/'
+rss.attrib['xmlns:podcast'] = 'https://podcastindex.org/namespace/1.0'
 channel = ET.SubElement(rss, 'channel')
 
 # --- Channel Metadata ---
-ET.SubElement(channel, "itunes:category", text="Kids & Family")
-ET.SubElement(channel, "itunes:image", href=hero_image_url)
-itunes_owner = ET.SubElement(channel, "itunes:owner")
-ET.SubElement(itunes_owner, "itunes:name").text = "Australian Broadcasting Corporation"
-ET.SubElement(itunes_owner, "itunes:email").text = "abcpodcasts@abc.net.au"
-
-ET.SubElement(channel, "itunes:author").text = "ABC Kids listen"
-ET.SubElement(channel, "title").text = program_title
-ET.SubElement(channel, "link").text = program_link
-ET.SubElement(channel, "description").text = program_description
-ET.SubElement(channel, "language").text = "en"
-ET.SubElement(channel, "copyright").text = "Copyright 2025, Australian Broadcasting Corporation. All rights reserved."
-ET.SubElement(channel, "pubDate").text = now_rfc2822
-ET.SubElement(channel, "lastBuildDate").text = now_rfc2822
-
-# Standard <image> tag
-if hero_image_url:
-    image = ET.SubElement(channel, 'image')
-    ET.SubElement(image, 'title').text = program_title
-    ET.SubElement(image, 'url').text = hero_image_url
-    ET.SubElement(image, 'link').text = main_url
-    ET.SubElement(image, "description").text = program_description
-
-#continue channel metadata
-ET.SubElement(channel, "ttl").text = "30"
 ET.SubElement(channel, "atom:link", {
     "href": feed_link,
     "rel": "self",
     "type": "application/rss+xml"
 })
+ET.SubElement(channel, "title").text = program_title
+ET.SubElement(channel, "lastBuildDate").text = now_rfc2822
+ET.SubElement(channel, "link").text = program_link
+ET.SubElement(channel, "language").text = "en"
+ET.SubElement(channel, "copyright").text = "Copyright 2025, Australian Broadcasting Corporation. All rights reserved."
+ET.SubElement(channel, "podcast:locked").text = "no"
+ET.SubElement(channel, "itunes:author").text = "ABC Kids listen"
+ET.SubElement(channel, "itunes:type").text = "episodic"
 ET.SubElement(channel, "itunes:explicit").text = "false"
-ET.SubElement(channel, "itunes:author").text = "ABC KIDS listen"    #duplicate, same as Dino Dome example
-ET.SubElement(channel, "itunes:summary").text = program_description
-ET.SubElement(channel, "itunes:subtitle").text = program_description
-#ET.SubElement(channel, "itunes:image", href=hero_image_url)        #duplicate, is already included above
+ET.SubElement(channel, "description").text = program_description
+itunes_owner = ET.SubElement(channel, "itunes:owner")
+ET.SubElement(itunes_owner, "itunes:name").text = "Australian Broadcasting Corporation"
+ET.SubElement(itunes_owner, "itunes:email").text = "abcpodcasts@abc.net.au"
+# Standard <image> tag
+if hero_image_url:
+    image = ET.SubElement(channel, 'image')
+    ET.SubElement(image, 'url').text = hero_image_url
+    ET.SubElement(image, 'title').text = program_title
+    ET.SubElement(image, 'link').text = main_url
+ET.SubElement(channel, "itunes:image", href=hero_image_url)
+ET.SubElement(channel, "itunes:category", text="Kids & Family")
+
 
 # Step 5: Loop through episodes
 for episode_url in episode_links:
@@ -140,7 +133,6 @@ for episode_url in episode_links:
 
     # Duration (find not working)
     media_duration = 0
-
     for script in episode_soup.find_all('script'):
         script_text = script.get_text()
         match = re.search(r'"duration"\s*:\s*(\d+)', script_text)
@@ -163,9 +155,10 @@ for episode_url in episode_links:
     # RSS <item>
     item = ET.SubElement(channel, 'item')
     ET.SubElement(item, 'title').text = title
-    ET.SubElement(item, 'link').text = episode_url
+    ET.SubElement(item, 'itunes:title').text = title
+    ET.SubElement(item, "itunes:summary").text = description
     ET.SubElement(item, 'description').text = description
-    print("debug enclosure")
+    ET.SubElement(item, "itunes:author").text = "Australian Broadcasting Corporation" 
     ET.SubElement(item, 'enclosure', {
         'url': audio_url,
         'type': audio_type or 'audio/mpeg',
@@ -173,14 +166,10 @@ for episode_url in episode_links:
     })
     ET.SubElement(item, "guid", {"isPermaLink": "true"}).text = episode_url
     ET.SubElement(item, 'pubDate').text = pub_date
-    ET.SubElement(item, "itunes:author").text = "Australian Broadcasting Corporation" 
-    ET.SubElement(item, "itunes:summary").text = description
-    ET.SubElement(item, "itunes:subtitle").text = description
-    ET.SubElement(item, "itunes:image", href=hero_image_url)    # Need to add a search for the episode image
-    print("debug duration")
     ET.SubElement(item, "itunes:duration").text = str(media_duration) # str(timedelta(seconds=media_duration))
+    #ET.SubElement(item, "itunes:keywords").text = keywords
+    ET.SubElement(item, "itunes:episodeType").text = "full" 
     ET.SubElement(item, "itunes:explicit").text = "false"
-    ET.SubElement(item, "itunes:keywords").text = keywords
 
 
 # Step 6: Save feed
