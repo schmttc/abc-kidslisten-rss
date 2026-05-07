@@ -104,18 +104,43 @@ for episode_url in episode_links:
 
     # Date
     pub_date = None
+
+    def find_date_published(obj):
+        if isinstance(obj, dict):
+            if 'datePublished' in obj:
+                return obj['datePublished']
+
+            for value in obj.values():
+                result = find_date_published(value)
+                if result:
+                    return result
+
+        elif isinstance(obj, list):
+            for item in obj:
+                result = find_date_published(item)
+                if result:
+                    return result
+
+        return None
+
     for script in episode_soup.find_all('script', type='application/ld+json'):
         try:
+            if not script.string:
+                continue
+
             data = json.loads(script.string)
-            if isinstance(data, dict) and 'datePublished' in data:
-                pub_date_obj = datetime.strptime(data['datePublished'], '%Y-%m-%dT%H:%M:%S%z')
-                #pub_date = pub_date_obj.strftime('%a, %d %b %Y %H:%M:%S GMT')
+
+            date_str = find_date_published(data)
+
+            if date_str:
+                pub_date_obj = datetime.fromisoformat(date_str)
                 pub_date = format_datetime(pub_date_obj)
                 break
+
         except (json.JSONDecodeError, ValueError, TypeError):
             continue
+
     if not pub_date:
-        #pub_date = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
         pub_date = format_datetime(datetime.utcnow().replace(tzinfo=timezone.utc))
 
     # Audio URL
