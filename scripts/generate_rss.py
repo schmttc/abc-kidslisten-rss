@@ -61,7 +61,7 @@ itunes_owner = ET.SubElement(channel, "itunes:owner")
 ET.SubElement(itunes_owner, "itunes:name").text = "Australian Broadcasting Corporation"
 ET.SubElement(itunes_owner, "itunes:email").text = "abcpodcasts@abc.net.au"
 
-ET.SubElement(channel, "itunes:author").text = "ABC Kids listen"
+ET.SubElement(channel, "itunes:author").text = "ABC Kids Listen"
 ET.SubElement(channel, "title").text = program_title
 ET.SubElement(channel, "link").text = program_link
 ET.SubElement(channel, "description").text = program_description
@@ -86,7 +86,7 @@ ET.SubElement(channel, "atom:link", {
     "type": "application/rss+xml"
 })
 ET.SubElement(channel, "itunes:explicit").text = "false"
-ET.SubElement(channel, "itunes:author").text = "ABC KIDS listen"    #duplicate, same as Dino Dome example
+ET.SubElement(channel, "itunes:author").text = "ABC KIDS Listen"    #duplicate, same as Dino Dome example
 ET.SubElement(channel, "itunes:summary").text = program_description
 ET.SubElement(channel, "itunes:subtitle").text = program_description
 #ET.SubElement(channel, "itunes:image", href=hero_image_url)        #duplicate, is already included above
