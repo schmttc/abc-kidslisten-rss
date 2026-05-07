@@ -24,7 +24,7 @@ Scheduled update within a few hour of release. Copy the URL link into your podca
 </table>
 
 ## ABC Kids Listen Programs from Other Sources
-May not be up to date or relaible, provided as a reference only.
+May not be up to date or reliable, provided as a reference only.
 
 <table>
   <thead>
