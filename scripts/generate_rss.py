@@ -131,6 +131,7 @@ for episode_url in episode_links:
             data = json.loads(script.string)
 
             date_str = find_date_published(data)
+            date_str = date_str.replace("Z", "+00:00")
 
             if date_str:
                 pub_date_obj = datetime.fromisoformat(date_str)
@@ -176,7 +177,7 @@ for episode_url in episode_links:
 
     # Keywords
     keywords = None
-    json_ld_tag = soup.find("script", type="application/ld+json")
+    json_ld_tag = episode_soup.find("script", type="application/ld+json")
     if json_ld_tag and json_ld_tag.string:
         try:
             data = json.loads(json_ld_tag.string)
@@ -205,7 +206,12 @@ for episode_url in episode_links:
     print("debug duration")
     ET.SubElement(item, "itunes:duration").text = str(media_duration) # str(timedelta(seconds=media_duration))
     ET.SubElement(item, "itunes:explicit").text = "false"
-    ET.SubElement(item, "itunes:keywords").text = keywords
+    
+    if keywords:
+        if isinstance(keywords, list):
+            keywords = ", ".join(keywords)
+        ET.SubElement(item, "itunes:keywords").text = str(keywords)
+    #ET.SubElement(item, "itunes:keywords").text = keywords
 
 
 # Step 6: Save feed
