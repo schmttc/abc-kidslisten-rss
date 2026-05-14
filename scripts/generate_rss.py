@@ -61,7 +61,7 @@ itunes_owner = ET.SubElement(channel, "itunes:owner")
 ET.SubElement(itunes_owner, "itunes:name").text = "Australian Broadcasting Corporation"
 ET.SubElement(itunes_owner, "itunes:email").text = "abcpodcasts@abc.net.au"
 
-ET.SubElement(channel, "itunes:author").text = "ABC Kids listen"
+ET.SubElement(channel, "itunes:author").text = "ABC Kids Listen"
 ET.SubElement(channel, "title").text = program_title
 ET.SubElement(channel, "link").text = program_link
 ET.SubElement(channel, "description").text = program_description
@@ -86,7 +86,7 @@ ET.SubElement(channel, "atom:link", {
     "type": "application/rss+xml"
 })
 ET.SubElement(channel, "itunes:explicit").text = "false"
-ET.SubElement(channel, "itunes:author").text = "ABC KIDS listen"    #duplicate, same as Dino Dome example
+ET.SubElement(channel, "itunes:author").text = "ABC KIDS Listen"    #duplicate, same as Dino Dome example
 ET.SubElement(channel, "itunes:summary").text = program_description
 ET.SubElement(channel, "itunes:subtitle").text = program_description
 #ET.SubElement(channel, "itunes:image", href=hero_image_url)        #duplicate, is already included above
@@ -104,18 +104,44 @@ for episode_url in episode_links:
 
     # Date
     pub_date = None
+
+    def find_date_published(obj):
+        if isinstance(obj, dict):
+            if 'datePublished' in obj:
+                return obj['datePublished']
+
+            for value in obj.values():
+                result = find_date_published(value)
+                if result:
+                    return result
+
+        elif isinstance(obj, list):
+            for item in obj:
+                result = find_date_published(item)
+                if result:
+                    return result
+
+        return None
+
     for script in episode_soup.find_all('script', type='application/ld+json'):
         try:
+            if not script.string:
+                continue
+
             data = json.loads(script.string)
-            if isinstance(data, dict) and 'datePublished' in data:
-                pub_date_obj = datetime.strptime(data['datePublished'], '%Y-%m-%dT%H:%M:%S%z')
-                #pub_date = pub_date_obj.strftime('%a, %d %b %Y %H:%M:%S GMT')
+
+            date_str = find_date_published(data)
+            date_str = date_str.replace("Z", "+00:00")
+
+            if date_str:
+                pub_date_obj = datetime.fromisoformat(date_str)
                 pub_date = format_datetime(pub_date_obj)
                 break
+
         except (json.JSONDecodeError, ValueError, TypeError):
             continue
+
     if not pub_date:
-        #pub_date = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
         pub_date = format_datetime(datetime.utcnow().replace(tzinfo=timezone.utc))
 
     # Audio URL
@@ -151,7 +177,7 @@ for episode_url in episode_links:
 
     # Keywords
     keywords = None
-    json_ld_tag = soup.find("script", type="application/ld+json")
+    json_ld_tag = episode_soup.find("script", type="application/ld+json")
     if json_ld_tag and json_ld_tag.string:
         try:
             data = json.loads(json_ld_tag.string)
@@ -180,7 +206,12 @@ for episode_url in episode_links:
     print("debug duration")
     ET.SubElement(item, "itunes:duration").text = str(media_duration) # str(timedelta(seconds=media_duration))
     ET.SubElement(item, "itunes:explicit").text = "false"
-    ET.SubElement(item, "itunes:keywords").text = keywords
+    
+    if keywords:
+        if isinstance(keywords, list):
+            keywords = ", ".join(keywords)
+        ET.SubElement(item, "itunes:keywords").text = str(keywords)
+    #ET.SubElement(item, "itunes:keywords").text = keywords
 
 
 # Step 6: Save feed
