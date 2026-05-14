@@ -1,5 +1,11 @@
 ## abc-kidslisten-rss
-Generates podcast RSS feeds from ABC Kids Listen (https://www.abc.net.au/kidslisten), for use with Yoto player MYO cards or other RSS players.
+Generates podcast RSS feeds by web scraping ABC Kids Listen online radio programs (https://www.abc.net.au/kidslisten), for use with Yoto player MYO cards or other RSS players.
+
+Github Actions are used to schedule updates to rss files, which are hosted on this repo, and made available via github.io
+
+### Limitations:
+- Currently only works for the first page of episodes for a program
+- Will break if the ABC Kids Listen website changes substantially
 
 ## Available Programs
 Scheduled update within a few hour of release. Copy the URL link into your podcast feed to import.
